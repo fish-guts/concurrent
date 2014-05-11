@@ -10,7 +10,7 @@
 
 /* our main server buffer */
 char serverbuf[4096];
-int client_sock;
+static int client_sock;
 
 void launch_app(char *argv[]) {
 	if ((strcmp(argv[1], "start")) == 0)
@@ -121,7 +121,7 @@ void start_server(void) {
 
 		client_sock = accept(sock, (struct sockaddr *) &client, &len);
 		if (client_sock < 0) {
-			fprintf(stderr, "accept failed");
+			fprintf(stderr, "accept failed\n");
 		} else {
 			/* This is the client process */
 			close(sock);
