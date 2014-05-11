@@ -3,6 +3,7 @@
 #define PORT 8083
 #define BUF_SIZE 1024
 
+
 int main(int argc, char* argv[]) {
 	start_client("localhost");
 }
@@ -10,6 +11,8 @@ int main(int argc, char* argv[]) {
 void start_client(const char *address) {
 	struct hostent *he;
 	struct sockaddr_in server;
+	int s;
+	char buf[BUF_SIZE];
 	int sockfd = open_socket();
 	if ((he = gethostbyname(address)) == NULL) {
 		fprintf(stderr,"error resolving hostname..");
@@ -31,8 +34,11 @@ void start_client(const char *address) {
 	}
 	fprintf(stderr,">");
 	while(!quitting) {
+		s = read(sockfd, buf, sizeof(buf));
+		printf("Message from Server: %s\n",buf);
 		char ch = getchar();
 		send(sockfd,ch,1024,0);
+
 	}
 }
 

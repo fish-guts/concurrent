@@ -121,13 +121,12 @@ void start_server(void) {
 
 		client_sock = accept(sock, (struct sockaddr *) &client, &len);
 		if (client_sock < 0) {
-			fprintf(stderr, "accept failed\n");
+			fprintf(stderr, "Accept failed\n");
 		} else {
 			/* This is the client process */
-			close(sock);
 			tid = pthread_create(&client_thread,NULL,doprocessing,(void*)t);
 			if(tid) {
-				fprintf(stderr,"Error creating thread: %d",tid);
+				fprintf(stderr,"Error creating thread: %d\n",tid);
 			}
 		}
 	}
@@ -138,25 +137,19 @@ void *doprocessing(void) {
 
 	int s, len, rc;
 	char buf[100000];
-	char buffer[256];
+	char *str = "Welcome\n";
 
-	bzero(buffer, 256);
+	bzero(buf, 100000);
+	n = write(client_sock,str,sizeof(str));
 
-	n = read(client_sock, buffer, 255);
-	if (n < 0) {
-		perror("ERROR reading from socket");
-		exit(1);
-	}
-
-	n = write(client_sock, "I got your message", 18);
 	if (n < 0) {
 		fprintf(stderr,"ERROR writing to socket");
 		exit(1);
 	}
-	s = recv(sock, buffer, sizeof(serverbuf), 0);
+	s = recv(sock, buf, sizeof(serverbuf), 0);
 	if (s) {
 		buf[s] = 0;
-		// we use CRLF as a line breaker, itŝ easier to parse the commands
+		// we use CRLF as a line breaker, its easier to parse the commands
 		char *pch = strtok(buf, "\r\n");
 		while (pch != NULL) {
 			strcpy(serverbuf, pch);
