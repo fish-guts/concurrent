@@ -19,6 +19,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <pthread.h>
 
 #include "sock.h"
 
@@ -40,6 +41,7 @@ void print_start_msg(void);
 void start_server(void);
 void startup(void);
 void stop_server(void);
+void *doprocessing(void);
 
 
 

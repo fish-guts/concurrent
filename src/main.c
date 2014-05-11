@@ -7,8 +7,10 @@
 
 #include "main.h"
 
+
 /* our main server buffer */
 char serverbuf[4096];
+int client_sock;
 
 void launch_app(char *argv[]) {
 	if ((strcmp(argv[1], "start")) == 0)
@@ -46,6 +48,9 @@ void stop_server(void) {
 
 void startup(void) {
 	print_start_msg();
+
+
+	// daemonize, not yet needed.
 /*	pid_t pid, sid;
 	if (getppid() == 1)
 		return;
@@ -68,11 +73,14 @@ void startup(void) {
 }
 
 void start_server(void) {
-	int s, client_sock, len, rc;
+	int s, len, rc;
+	int tid;
+	long t;
 	char buf[100000];
 
 	struct sockaddr_in addr;
 	struct sockaddr_in client;
+	pthread_t client_thread;
 
 	sock = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -115,40 +123,34 @@ void start_server(void) {
 		if (client_sock < 0) {
 			fprintf(stderr, "accept failed");
 		} else {
-			pid_t pid = fork();
-			if (pid < 0) {
-				perror("ERROR on fork");
-				exit(1);
+			/* This is the client process */
+			close(sock);
+			tid = pthread_create(&client_thread,NULL,doprocessing,(void*)t);
+			if(tid) {
+				fprintf(stderr,"Error creating thread: %d",tid);
 			}
-			if (pid == 0) {
-				/* This is the client process */
-				close(sock);
-				doprocessing(client_sock);
-				exit(0);
-			}
-
 		}
 	}
 }
 
-void doprocessing(int sock) {
+void *doprocessing(void) {
 	int n;
 
-	int s, client_sock, len, rc;
+	int s, len, rc;
 	char buf[100000];
 	char buffer[256];
 
 	bzero(buffer, 256);
 
-	n = read(sock, buffer, 255);
+	n = read(client_sock, buffer, 255);
 	if (n < 0) {
 		perror("ERROR reading from socket");
 		exit(1);
 	}
 
-	n = write(sock, "I got your message", 18);
+	n = write(client_sock, "I got your message", 18);
 	if (n < 0) {
-		perror("ERROR writing to socket");
+		fprintf(stderr,"ERROR writing to socket");
 		exit(1);
 	}
 	s = recv(sock, buffer, sizeof(serverbuf), 0);
