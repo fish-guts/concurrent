@@ -19,4 +19,3 @@ int open_socket(void)
 	return socket(AF_INET, SOCK_STREAM, 0);
 }
 
-

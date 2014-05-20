@@ -9,7 +9,7 @@
 #define STRUCT_H_
 
 typedef struct __file sFile;
-
+typedef struct _command cmd;
 
 
 struct __file {
@@ -18,5 +18,13 @@ struct __file {
 	char *content;
 	char *location;
 } __file;
+
+
+
+struct _command
+{
+    const char *name;
+    void (*func)(char *source, int ac, char **av);
+};
 
 #endif /* STRUCT_H_ */

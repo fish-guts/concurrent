@@ -8,6 +8,9 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 
+#undef stricmp
+#define _stricmp stricmp
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -20,8 +23,20 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <pthread.h>
+#include <ctype.h>
+#include <fcntl.h>
+#include <setjmp.h>
+#include <signal.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <regex.h>
+
 
 #include "sock.h"
+#include "struct.h"
 
 /* pp directives */
 
@@ -29,9 +44,7 @@
 
 /* variables */
 
-int sock;
-int quitting;
-
+static int sock;
 
 /* function prototypes */
 
@@ -41,7 +54,17 @@ void print_start_msg(void);
 void start_server(void);
 void startup(void);
 void stop_server(void);
-void *doprocessing(void);
+void *doprocessing(void *arg);
+int tokenize(char *buf, char ***argv);
+void cmd_create(char *src, int ac, char **av);
+int _stricmp(const char *str1, const char *str2);
+cmd *find_cmd(const char *name);
+void parse(void);
+char *strscpy(char *d, const char *s, size_t len);
+char *sstrdup(const char *s);
+void *srealloc(void *oldptr, long newsize);
+void *scalloc(long size, long l);
+void *smalloc(long size);
 
 
 

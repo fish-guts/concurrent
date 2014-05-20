@@ -1,8 +1,11 @@
-#include "main.h";
+#include "main.h"
 
 #define PORT 8083
 #define BUF_SIZE 1024
 
+int quitting;
+
+void start_client(const char *address);
 
 int main(int argc, char* argv[]) {
 	start_client("localhost");
@@ -13,6 +16,7 @@ void start_client(const char *address) {
 	struct sockaddr_in server;
 	int s;
 	char buf[BUF_SIZE];
+	char input[BUF_SIZE];
 	int sockfd = open_socket();
 	if ((he = gethostbyname(address)) == NULL) {
 		fprintf(stderr,"error resolving hostname..");
@@ -29,16 +33,27 @@ void start_client(const char *address) {
 
 	/* connect */
 	if (connect(sockfd, (struct sockaddr *) &server, sizeof(server))) {
-		puts("error connecting..");
+		puts("Error connecting...\n");
 		exit(1);
+	} else {
+		fprintf(stderr,"Connected to server\n");
 	}
-	fprintf(stderr,">");
+	send(sockfd,"Hallo Server\n",BUF_SIZE,0);
 	while(!quitting) {
-		s = read(sockfd, buf, sizeof(buf));
-		printf("Message from Server: %s\n",buf);
-		char ch = getchar();
-		send(sockfd,ch,1024,0);
-
+		fprintf(stderr,"client\n");
+		s = recv(sockfd, buf, sizeof(buf),0);
+		if(s) {
+			buf[s] = 0;
+			fprintf(stderr,"Message from Server: %s\n",buf);
+			fgets (input, sizeof(input), stderr);
+			if(send(sockfd,buf,strlen(buf),0)<0) {
+				fprintf(stderr,"Error sending data: %s\n",errno);
+			} else {
+				fprintf(stderr,"Hello: %s\n",buf);
+			}
+		} else {
+			fprintf(stderr,"Error in recv: %s\n",errno);
+		}
 	}
 }
 
