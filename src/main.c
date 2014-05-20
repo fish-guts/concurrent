@@ -13,6 +13,8 @@ char serverbuf[4096];
 static int client_sock;
 int quitting;
 
+thread *threadlist = NULL;
+
 
 cmd cmds[] = {
 	{ "CREATE",	  cmd_create	    },
@@ -61,6 +63,14 @@ void parse(void) {
 	} else
 		fprintf(stderr, "Unknown command: %s\n", serverbuf);
 	free(av);
+
+}
+
+void add_thread(thread *t) {
+	t->next = threadlist;
+	if (threadlist)
+		threadlist->prev = t;
+	threadlist = t;
 
 }
 
@@ -139,7 +149,7 @@ void start_server(void) {
 	struct sockaddr_in addr;
 	struct sockaddr_in client;
 	pthread_t client_thread;
-	pthread_mutex_t mxq;
+	pthread_mutex_t mx;
 
 	sock = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -183,9 +193,14 @@ void start_server(void) {
 			fprintf(stderr, "Accept failed\n");
 		} else {
 			/* This is the client process */
-			pthread_mutex_init(&mxq,NULL);
-			pthread_mutex_lock(&mxq);
-			tid = pthread_create(&client_thread, NULL, doprocessing, &mxq);
+
+			thread *t = scalloc(sizeof(thread), 1);
+			t->mx = &mx;
+			t->t = pthread_self();
+			pthread_mutex_init(&mx,NULL);
+			pthread_mutex_lock(&mx);
+			tid = pthread_create(&client_thread, NULL, doprocessing, &t);
+			add_thread(t);
 			if (tid) {
 				fprintf(stderr, "Error creating thread: %d\n", tid);
 			}
@@ -193,12 +208,10 @@ void start_server(void) {
 	}
 }
 
-void *doprocessing(void *arg) {
+void *doprocessing(thread *t) {
 	pthread_mutex_t *mx;
 	pthread_mutex_t *mxq;
-	int n;
-
-	int s, len, rc;
+	int n,s;
 	char buf[100000];
 	bzero(buf, sizeof(buf));
 
@@ -223,6 +236,7 @@ void *doprocessing(void *arg) {
 		} else {
 			fprintf(stderr, "Client disconnected\n");
 			close(client_sock);
+			pthread_exit(t->t);
 			pthread_mutex_unlock(&mxq);
 
 		}

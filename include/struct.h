@@ -10,6 +10,7 @@
 
 typedef struct __file sFile;
 typedef struct _command cmd;
+typedef struct _thread thread;
 
 
 struct __file {
@@ -18,6 +19,13 @@ struct __file {
 	char *content;
 	char *location;
 } __file;
+
+struct _thread {
+	int tid;
+	pthread_t t;
+	pthread_mutex_t *mx;
+	thread *next, *prev;
+};
 
 
 

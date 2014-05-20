@@ -18,6 +18,7 @@
 #include <sys/time.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <arpa/inet.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -48,13 +49,13 @@ static int sock;
 
 /* function prototypes */
 
-
+void add_thread(thread *t);
 void launch_app(char* argv[]);
 void print_start_msg(void);
 void start_server(void);
 void startup(void);
 void stop_server(void);
-void *doprocessing(void *arg);
+void *doprocessing(thread *t);
 int tokenize(char *buf, char ***argv);
 void cmd_create(char *src, int ac, char **av);
 int _stricmp(const char *str1, const char *str2);
