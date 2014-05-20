@@ -8,9 +8,6 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 
-#undef stricmp
-#define _stricmp stricmp
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -38,14 +35,18 @@
 
 #include "sock.h"
 #include "struct.h"
+#include "util.h"
+#include "command.h"
 
-/* pp directives */
-
-#define PORT 8083
 
 /* variables */
 
 static int sock;
+static int client_sock;
+
+/* pp directives */
+
+#define PORT 8083
 
 /* function prototypes */
 
@@ -56,16 +57,7 @@ void start_server(void);
 void startup(void);
 void stop_server(void);
 void *doprocessing(thread *t);
-int tokenize(char *buf, char ***argv);
-void cmd_create(char *src, int ac, char **av);
-int _stricmp(const char *str1, const char *str2);
-cmd *find_cmd(const char *name);
 void parse(void);
-char *strscpy(char *d, const char *s, size_t len);
-char *sstrdup(const char *s);
-void *srealloc(void *oldptr, long newsize);
-void *scalloc(long size, long l);
-void *smalloc(long size);
 
 
 

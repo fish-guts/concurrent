@@ -10,19 +10,10 @@
 
 /* our main server buffer */
 char serverbuf[4096];
-static int client_sock;
 int quitting;
 
 thread *threadlist = NULL;
 
-
-cmd cmds[] = {
-	{ "CREATE",	  cmd_create	    },
-	{ "OPEN",	  NULL		},
-	{ "DELETE",	  NULL		},
-	{ "RENAME",	  NULL		}
-
-};
 
 void parse(void) {
 	char source[1024];
@@ -72,12 +63,6 @@ void add_thread(thread *t) {
 		threadlist->prev = t;
 	threadlist = t;
 
-}
-
-
-void cmd_create(char *src, int ac, char **av)
-{
-	send(client_sock,"cmd received\n",15,0);
 }
 
 
@@ -241,107 +226,4 @@ void *doprocessing(thread *t) {
 
 		}
 	}
-}
-
-
-
-/********************************************************************/
-/**
- * 	handle the server's split a message line from the server
- */
-int tokenize(char *buf, char ***argv)
-{
-	int argvsize = 8;
-	int argc = 0;
-	char *pch;
-	*argv = smalloc(sizeof(char*) * argvsize);
-	while (*buf) {
-		if (argc == argvsize) {
-			argvsize += 8;
-			*argv = srealloc(*argv, sizeof(char*) * argvsize);
-		}
-		if (*buf == ':') {
-			(*argv)[argc++] = buf + 1;
-			buf = "";
-		} else {
-			pch = strpbrk(buf, " ");
-			if (pch) {
-				*pch++ = 0;
-				while (isspace(*pch)) {
-					pch++;
-				}
-			} else {
-				pch = buf + strlen(buf);
-			}
-			(*argv)[argc++] = buf;
-			buf = pch;
-		}
-	}
-	return argc;
-}
-
-
-cmd *find_cmd(const char *name)
-{
-    cmd *c;
-    for (c = cmds; c->name; c++)
-    {
-		if(stricmp(name,c->name)==0)
-	    	return c;
-    }
-    return NULL;
-}
-int _stricmp(const char *str1, const char *str2) {
-	register signed char __res;
-	while (1) {
-		if ((__res = toupper(*str1) - toupper(*str2++)) != 0 || !*str1++)
-			break;
-	}
-	return __res;
-}
-
-char *strscpy(char *d, const char *s, size_t len) {
-	char *d_orig = d;
-	if (!len)
-		return d;
-	while (--len && (*d++ = *s++))
-		;
-	*d = 0;
-	return d_orig;
-}
-void *scalloc(long size, long l) {
-	void *buf;
-	if ((!size) || (!l)) {
-		size = l = 1;
-	}
-	buf = calloc(size, l);
-	if (!buf)
-		raise(SIGUSR1);
-	return buf;
-}
-void *srealloc(void *oldptr, long newsize) {
-	void *buf;
-	if (!newsize) {
-		//log("srealloc: Illegal attempt to allocate 0 bytes");
-		newsize = 1;
-	}
-	buf = realloc(oldptr, newsize);
-	if (!buf)
-		raise(SIGUSR1);
-	return buf;
-}
-char *sstrdup(const char *s) {
-	char *t = strdup(s);
-	if (!t)
-		raise(SIGUSR1);
-	return t;
-}
-void *smalloc(long size) {
-	void *buf;
-	if (!size)
-		size = 1;
-	buf = malloc(size);
-	if (!buf)
-		raise(SIGUSR1);
-	return buf;
 }

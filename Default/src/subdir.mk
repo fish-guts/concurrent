@@ -5,27 +5,30 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../src/main.c \
-../src/sock.c 
+../src/command.c \
+../src/util.c
 
 2_SRCS += \
 ../src/client.c \
-../src/sock.c 
+
 
 OBJS += \
 ./src/main.o \
-./src/sock.o
+./src/util.o \
+./src/command.o
+
 
 2OBJS += \
 ./src/client.o \
-./src/sock.o
 
 C_DEPS += \
 ./src/main.d \
-./src/sock.d 
+./src/util.d \
+./src/command.d 
 
 2_DEPS += \
 ./src/client.d \
-./src/sock.d
+
 
 # Each subdirectory must supply rules for building sources it contributes
 src/%.o: ../src/%.c
@@ -34,3 +37,4 @@ src/%.o: ../src/%.c
 	gcc -I"../include" -O2 -g -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
+	
