@@ -17,7 +17,7 @@ void start_client(const char *address) {
 	int s;
 	char buf[BUF_SIZE];
 	char input[BUF_SIZE];
-	int sockfd = open_socket();
+	sock = socket(AF_INET, SOCK_STREAM, 0);
 	if ((he = gethostbyname(address)) == NULL) {
 		fprintf(stderr,"error resolving hostname..");
 		exit(1);
@@ -32,25 +32,24 @@ void start_client(const char *address) {
 	server.sin_port = htons((unsigned short)PORT);
 
 	/* connect */
-	if (connect(sockfd, (struct sockaddr *) &server, sizeof(server))) {
+	if (connect(sock, (struct sockaddr *) &server, sizeof(server))) {
 		puts("Error connecting...\n");
 		exit(1);
 	} else {
 		fprintf(stderr,"Connected to server\n");
 	}
-	send(sockfd,"Hallo Server\n",BUF_SIZE,0);
+	send(sock,"Hallo Server\n",BUF_SIZE,0);
+	int i = 0;
 	while(!quitting) {
-		fprintf(stderr,"client\n");
-		s = recv(sockfd, buf, sizeof(buf),0);
-		if(s) {
+
+		fgets(input, sizeof(input), stdin);
+		if(send(sock,input,strlen(input),0)<0) {
+			fprintf(stderr,"Error sending data: %s\n",errno);
+		}
+		s = recv(sock, buf, sizeof(buf),0);
+		if(s>0) {
 			buf[s] = 0;
 			fprintf(stderr,"Message from Server: %s\n",buf);
-			fgets (input, sizeof(input), stderr);
-			if(send(sockfd,buf,strlen(buf),0)<0) {
-				fprintf(stderr,"Error sending data: %s\n",errno);
-			} else {
-				fprintf(stderr,"Hello: %s\n",buf);
-			}
 		} else {
 			fprintf(stderr,"Error in recv: %s\n",errno);
 		}

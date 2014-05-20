@@ -19,6 +19,7 @@ void parse(void) {
 	char source[1024];
 	char command[1024];
 	char buf[1024];
+	char err[1024];
 	char *pch;
 	int ac;
 	char **av;
@@ -51,8 +52,11 @@ void parse(void) {
 	if ((ic = find_cmd(command))) {
 		if (ic->func)
 			ic->func(source, ac, av);
-	} else
+	} else {
 		fprintf(stderr, "Unknown command: %s\n", serverbuf);
+		sprintf(buf,"Unknown Command: %s\n",serverbuf);
+		send(client_sock,buf,sizeof(buf),0);
+	}
 	free(av);
 
 }
@@ -208,7 +212,6 @@ void *doprocessing(thread *t) {
 	while (!quitting) {
 		s = recv(client_sock, buf, sizeof(serverbuf), 0);
 		if (s>0) {
-			fprintf(stderr, "Bytes received: %i\n", s);
 			buf[s] = 0;
 			// we use LF as a line breaker, its easier to parse the commands
 			char *pch = strtok(buf, "\n");
