@@ -37,7 +37,10 @@ void cmd_create(int ac, char *av) {
 
 void cmd_list(int ac, char *av) {
 	sFile *list;
-	send(client_sock, "ACK\n", 5, 0);
+	long num_files = file_count;
+	char *ack = (char*) malloc((sizeof(char*)*12)+sizeof(long));
+	sprintf(ack,"ACK %d\n",file_count);
+	send(client_sock,ack,(int)strlen(ack), 0);
 	if (file_list != NULL) {
 		for (list = file_list; list->filename; list++) {
 			send(client_sock, list->filename, strlen(list->filename), 0);
