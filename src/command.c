@@ -21,39 +21,25 @@ cmd cmds[] = {
 /**
  * 	handle the server's split a message line from the server
  */
-int tokenize(char *buf, char ***argv)
+int tokenize(char *buf)
 {
-	int argvsize = 8;
-	int argc = 0;
-	char *pch;
-	*argv = smalloc(sizeof(char*) * argvsize);
-	while (*buf) {
-		if (argc == argvsize) {
-			argvsize += 8;
-			*argv = srealloc(*argv, sizeof(char*) * argvsize);
-		}
-		if (*buf == ':') {
-			(*argv)[argc++] = buf + 1;
-			buf = "";
-		} else {
-			pch = strpbrk(buf, " ");
-			if (pch) {
-				*pch++ = 0;
-				while (isspace(*pch)) {
-					pch++;
-				}
-			} else {
-				pch = buf + strlen(buf);
-			}
-			(*argv)[argc++] = buf;
-			buf = pch;
-		}
+	int ac = 0;
+	char delimiter[] = " ";
+	char *ptr;
+
+	ptr = strtok(buf, delimiter);
+
+	while(ptr != NULL) {
+		ac++;
+		ptr = strtok(NULL, delimiter);
 	}
-	return argc;
+	return ac;
 }
-void cmd_create(char *src, int ac, char **av) {
-	char *str = "Hallo, Welt\n";
-	send(client_sock,str,strlen(str),0);
+
+void cmd_create(int ac, char *av) {
+	char *str = (char*) malloc(sizeof(char*)*1024);
+	sprintf(str,"Hallo, Welt\n");
+	send(client_sock,str,(int)strlen(str),0);
 }
 
 

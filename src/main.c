@@ -16,28 +16,16 @@ thread *threadlist = NULL;
 
 
 void parse(void) {
-	char source[1024];
 	char command[1024];
 	char buf[1024];
 	char err[1024];
+	char *fullcmd[1024];
 	char *pch;
 	int ac;
 	char **av;
 	cmd *ic;
 	strscpy(buf, serverbuf, sizeof(buf));
-	if (*buf == ':') {
-		pch = strpbrk(buf, " ");
-		if (!pch)
-			return;
-		*pch = 0;
-		while (isspace(*++pch))
-			;
-		strscpy(source, buf + 1, sizeof(source));
-		strscpy(buf, pch, sizeof(buf));
-
-	} else {
-		*source = 0;
-	}
+	strscpy(fullcmd, serverbuf, sizeof(fullcmd));
 	if (!*buf)
 		return;
 	pch = strpbrk(buf, " ");
@@ -48,13 +36,14 @@ void parse(void) {
 	} else
 		pch = buf + strlen(buf);
 	strscpy(command, buf, sizeof(command));
-	ac = tokenize(pch, &av);
+	ac = tokenize(fullcmd);
+
 	if ((ic = find_cmd(command))) {
 		if (ic->func)
-			ic->func(source, ac, av);
+			ic->func(ac, fullcmd);
 	} else {
-		fprintf(stderr, "Unknown command: %s\n", serverbuf);
 		sprintf(buf,"Unknown Command: %s\n",serverbuf);
+		fprintf(stderr,"%s", buf);
 		send(client_sock,buf,sizeof(buf),0);
 	}
 	free(av);
@@ -186,9 +175,9 @@ void start_server(void) {
 			thread *t = scalloc(sizeof(thread), 1);
 			t->mx = &mx;
 			t->t = pthread_self();
-			pthread_mutex_init(&mx,NULL);
-			pthread_mutex_lock(&mx);
+			//pthread_mutex_init(&mx,NULL);
 			tid = pthread_create(&client_thread, NULL, doprocessing, &t);
+			t->tid = tid;
 			add_thread(t);
 			if (tid) {
 				fprintf(stderr, "Error creating thread: %d\n", tid);

@@ -32,7 +32,7 @@ struct _thread {
 struct _command
 {
     const char *name;
-    void (*func)(char *source, int ac, char **av);
+    void (*func)(int ac, char *av);
 };
 
 #endif /* STRUCT_H_ */

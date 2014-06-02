@@ -9,8 +9,8 @@
 #define COMMAND_H_
 
 
-int tokenize(char *buf, char ***argv);
 cmd *find_cmd(const char *name);
-void cmd_create(char *src, int ac, char **av);
+void cmd_create(int ac, char *av);
+int tokenize(char *buf);
 
 #endif /* COMMAND_H_ */

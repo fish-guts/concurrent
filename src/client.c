@@ -43,7 +43,7 @@ void start_client(const char *address) {
 	while(!quitting) {
 
 		fgets(input, sizeof(input), stdin);
-		if(send(sock,input,strlen(input),0)<0) {
+		if(send(sock,input,sizeof(input),0)<0) {
 			fprintf(stderr,"Error sending data: %s\n",errno);
 		}
 		s = recv(sock, buf, sizeof(buf),0);
