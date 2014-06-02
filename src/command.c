@@ -37,9 +37,8 @@ int tokenize(char *buf)
 }
 
 void cmd_create(int ac, char *av) {
-	char *str = (char*) malloc(sizeof(char*)*1024);
-	sprintf(str,"Hallo, Welt\n");
-	send(client_sock,str,(int)strlen(str),0);
+	char buf[13] = "Hallo, Welt\n";
+	send(client_sock,buf,sizeof(buf),0);
 }
 
 

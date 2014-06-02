@@ -38,6 +38,7 @@ void parse(void) {
 	strscpy(command, buf, sizeof(command));
 	ac = tokenize(fullcmd);
 
+
 	if ((ic = find_cmd(command))) {
 		if (ic->func)
 			ic->func(ac, fullcmd);

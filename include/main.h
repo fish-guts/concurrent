@@ -21,7 +21,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <pthread.h>
-#include <ctype.h>
+#include <ctype.h>-
 #include <fcntl.h>
 #include <setjmp.h>
 #include <signal.h>
@@ -42,7 +42,7 @@
 /* variables */
 
 static int sock;
-static int client_sock;
+int client_sock;
 
 /* pp directives */
 
