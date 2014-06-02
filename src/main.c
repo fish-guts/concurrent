@@ -12,6 +12,7 @@
 char serverbuf[4096];
 int quitting;
 
+/* our list containing our threads (clients) */
 thread *threadlist = NULL;
 
 
@@ -38,7 +39,7 @@ void parse(void) {
 	strscpy(command, buf, sizeof(command));
 	ac = tokenize(fullcmd);
 
-
+	/* we'd like to call our functions dynamically */
 	if ((ic = find_cmd(command))) {
 		if (ic->func)
 			ic->func(ac, fullcmd);
@@ -58,7 +59,6 @@ void add_thread(thread *t) {
 	threadlist = t;
 
 }
-
 
 void launch_app(char *argv[]) {
 	if ((strcmp(argv[1], "start")) == 0)
@@ -215,7 +215,6 @@ void *doprocessing(thread *t) {
 			fprintf(stderr, "Client disconnected\n");
 			close(client_sock);
 			pthread_exit(t->t);
-			pthread_mutex_unlock(&mxq);
 
 		}
 	}

@@ -43,6 +43,7 @@
 
 static int sock;
 int client_sock;
+int file_list;
 
 /* pp directives */
 

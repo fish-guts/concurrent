@@ -41,6 +41,10 @@ void cmd_create(int ac, char *av) {
 	send(client_sock,buf,sizeof(buf),0);
 }
 
+void cmd_list(int ac, char *av) {
+	char *response = (char*)malloc(sizeof(file_list * sizeof(sFile)));
+}
+
 
 cmd *find_cmd(const char *name)
 {
