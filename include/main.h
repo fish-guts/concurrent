@@ -43,7 +43,8 @@
 
 static int sock;
 int client_sock;
-int file_list;
+sFile *file_list = NULL;
+int file_count = 0;
 
 /* pp directives */
 
