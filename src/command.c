@@ -7,8 +7,6 @@
 
 #include "main.h"
 
-#define ERR_NOSUCHFILE "NOSUCHFILE\n"
-
 cmd cmds[] = {
 		{ "CREATE", cmd_create },
 		{ "LIST", cmd_list },
@@ -55,6 +53,7 @@ void cmd_list(int ac, char *av) {
 }
 void cmd_read(int ac, char *av) {
 	sFile *list;
+	char err[32] = "NOSUCHFILE";
 	char *filename = strdup(av);
 	fprintf(stderr, "Filename: %s\n", filename);
 	char *fileInfo = (char*) malloc((sizeof(char*) * 1024));
@@ -69,7 +68,7 @@ void cmd_read(int ac, char *av) {
 				return;
 			}
 		}
-		send(client_sock,ERR_NOSUCHFILE,(int) strlen(ERR_NOSUCHFILE),0);
+		send(client_sock,err,(int) sizeof(err),0);
 		return;
 	}
 }

@@ -51,6 +51,7 @@ server: $(RUN_OBJS)
 	
 	
 ./obj/main.o :
+	rm -f obj/*
 	$(CC) -I$(INCLUDE) $(CFLAGS) src/main.c -o obj/main.o
 	
 ./obj/sock.o :
@@ -71,5 +72,6 @@ client: $(TEST_OBJS)
 
 # Other Targets
 clean:
-	-$(RM) $(OBJS)$(C_DEPS)$(EXECUTABLES) "Concurrent C Programming"
+	@echo 'Cleaning'
+	-$(RM) $(RUN_OBJS) $(EXECUTABLES)
 	-@echo 'Finished cleaning targets'

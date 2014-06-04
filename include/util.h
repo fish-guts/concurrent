@@ -21,6 +21,4 @@ void *scalloc(long size, long l);
 void *smalloc(long size);
 
 
-
-
 #endif /* UTIL_H_ */

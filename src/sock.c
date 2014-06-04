@@ -1,13 +1,6 @@
 /*
  * sock.c
  *
- *  Created on: May 5, 2014
- *      Author: fish-guts
- */
-
-/*
- * sock.c
- *
  *  Created on: Apr 26, 2014
  *      Author: fish-guts
  */

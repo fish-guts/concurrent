@@ -8,6 +8,7 @@
 #include "main.h"
 
 /* our main server buffer */
+
 char serverbuf[4096];
 int quitting;
 
@@ -215,4 +216,5 @@ void *doprocessing(thread *t) {
 
 		}
 	}
+	return -1;
 }

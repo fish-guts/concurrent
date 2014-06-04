@@ -32,8 +32,6 @@
 #include <unistd.h>
 #include <regex.h>
 
-
-#include "sock.h"
 #include "struct.h"
 #include "util.h"
 #include "command.h"
@@ -43,8 +41,9 @@
 
 int sock;
 int client_sock;
-sFile *file_list = NULL;
-int file_count = 0;
+
+sFile *file_list;
+int file_count;
 
 /* pp directives */
 
@@ -60,7 +59,6 @@ void startup(void);
 void stop_server(void);
 void *doprocessing(thread *t);
 void parse(void);
-
 
 
 #endif /* MAIN_H_ */
