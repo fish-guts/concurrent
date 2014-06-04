@@ -21,7 +21,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <pthread.h>
-#include <ctype.h>-
+#include <ctype.h>
 #include <fcntl.h>
 #include <setjmp.h>
 #include <signal.h>
@@ -41,7 +41,7 @@
 
 /* variables */
 
-static int sock;
+int sock;
 int client_sock;
 sFile *file_list = NULL;
 int file_count = 0;

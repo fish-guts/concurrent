@@ -1,12 +1,11 @@
 /*
  * main.c
  *
- *  Created on: Apr 26, 2014
- *      Author: fish-guts
+ * Created on: Apr 26, 2014
+ * Author: fish-guts
  */
 
 #include "main.h"
-
 
 /* our main server buffer */
 char serverbuf[4096];
@@ -14,7 +13,6 @@ int quitting;
 
 /* our list containing our threads (clients) */
 thread *threadlist = NULL;
-
 
 void parse(void) {
 	char command[1024];
@@ -44,9 +42,9 @@ void parse(void) {
 		if (ic->func)
 			ic->func(ac, fullcmd);
 	} else {
-		sprintf(buf,"Unknown Command: %s\n",serverbuf);
-		fprintf(stderr,"%s", buf);
-		send(client_sock,buf,sizeof(buf),0);
+		sprintf(buf, "Unknown Command: %s\n", serverbuf);
+		fprintf(stderr, "%s", buf);
+		send(client_sock, buf, sizeof(buf), 0);
 	}
 	free(av);
 
@@ -97,8 +95,8 @@ void stop_server(void) {
 void startup(void) {
 	print_start_msg();
 
-	// daemonize, not yet needed.
-	/*	pid_t pid, sid;
+// daemonize, not yet needed.
+	/* pid_t pid, sid;
 	 if (getppid() == 1)
 	 return;
 	 pid = fork();
@@ -134,11 +132,11 @@ void start_server(void) {
 
 	unsigned short port = PORT;
 
-	// clear the struct
+// clear the struct
 	memset((char*) &addr, 0, sizeof(addr));
 
 	fprintf(stderr, "\n\nStarting server...");
-	// let's set some values
+// let's set some values
 
 	/* type of socket created in socket() */
 	addr.sin_family = AF_INET;
@@ -161,9 +159,9 @@ void start_server(void) {
 		exit(EXIT_FAILURE);
 	} else {
 		fprintf(stderr, "Server started successfully, listening on port %d\n",
-				PORT);
+		PORT);
 	}
-	// the  main server loop
+// the main server loop
 	while (!quitting) {
 		len = sizeof(struct sockaddr_in);
 
@@ -176,7 +174,7 @@ void start_server(void) {
 			thread *t = scalloc(sizeof(thread), 1);
 			t->mx = &mx;
 			t->t = pthread_self();
-			//pthread_mutex_init(&mx,NULL);
+//pthread_mutex_init(&mx,NULL);
 			tid = pthread_create(&client_thread, NULL, doprocessing, &t);
 			t->tid = tid;
 			add_thread(t);
@@ -190,10 +188,9 @@ void start_server(void) {
 void *doprocessing(thread *t) {
 	pthread_mutex_t *mx;
 	pthread_mutex_t *mxq;
-	int n,s;
+	int n, s;
 	char buf[100000];
 	bzero(buf, sizeof(buf));
-
 
 	if (n < 0) {
 		fprintf(stderr, "ERROR writing to socket");
@@ -201,9 +198,9 @@ void *doprocessing(thread *t) {
 	}
 	while (!quitting) {
 		s = recv(client_sock, buf, sizeof(serverbuf), 0);
-		if (s>0) {
+		if (s > 0) {
 			buf[s] = 0;
-			// we use LF as a line breaker, its easier to parse the commands
+// we use LF as a line breaker, its easier to parse the commands
 			char *pch = strtok(buf, "\n");
 			while (pch != NULL) {
 				strcpy(serverbuf, pch);
