@@ -51,7 +51,6 @@ server: $(RUN_OBJS)
 	
 	
 ./obj/main.o :
-	rm -f obj/*
 	$(CC) -I$(INCLUDE) $(CFLAGS) src/main.c -o obj/main.o
 	
 ./obj/sock.o :
@@ -65,13 +64,21 @@ server: $(RUN_OBJS)
 # Tool invocations
 client: $(TEST_OBJS)
 	@echo 'Building target: $@'
+	@echo 'Invoking: GCC C Compiler'
+	
+	$(CC) -I$(INCLUDE) $(CFLAGS) -o "$@" $<  
+
+	@echo 'done...'
 	@echo 'Invoking: GCC C Linker'
-	$(CC)  -o "client" $(TEST_OBJS) $(LIBS)
+	$(CC)  -o "client" $(TEST_OBJS) -l$(LIBS)
 	@echo 'Finished building target: $@'
-	@echo ' '	
+	@echo ' '
+	
+./obj/client.o : 
+	$(CC) -I$(INCLUDE) $(CFLAGS) src/client.c -o obj/client.o		
 
 # Other Targets
 clean:
 	@echo 'Cleaning'
-	-$(RM) $(RUN_OBJS) $(EXECUTABLES)
+	-$(RM) $(RUN_OBJS) $(TEST_OBJS) $(EXECUTABLES)
 	-@echo 'Finished cleaning targets'
