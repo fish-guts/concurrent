@@ -8,10 +8,22 @@
 #ifndef COMMAND_H_
 #define COMMAND_H_
 
+typedef struct {
+	sFile *a;
+	sFile *b;
+} iterator;
+
+
 cmd *find_cmd(const char *name);
 void cmd_create(int ac, char *av);
 void cmd_list(int ac, char *av);
 void cmd_read(int ac, char *av);
 int tokenize(char *buf);
+void interator_init(iterator *it);
+sFile *iterator_next(iterator *it);
+
+
+
+
 
 #endif /* COMMAND_H_ */

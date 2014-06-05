@@ -11,7 +11,7 @@ TEST_SRC = src/client.c
 
 
 #obj
-RUN_OBJS = obj/main.o obj/util.o obj/command.o obj/sock.o
+RUN_OBJS = obj/command.o obj/main.o obj/util.o obj/sock.o
 TEST_OBJS = obj/client.o
 
 #lib
@@ -41,7 +41,7 @@ server: $(RUN_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C Compiler'
 	
-	$(CC) -I$(INCLUDE) $(CFLAGS) -o "$@" $<  
+	#$(CC) -I$(INCLUDE) $(CFLAGS) -o "$@" $<  
 
 	@echo 'done...'
 	@echo 'Invoking: GCC C Linker'

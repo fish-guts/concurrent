@@ -8,31 +8,28 @@
 #ifndef STRUCT_H_
 #define STRUCT_H_
 
-typedef struct __file sFile;
-typedef struct _command cmd;
-typedef struct _thread thread;
+typedef struct _sFile sFile;
 
-
-struct __file {
+struct _sFile {
 	char *filename;
 	size_t size;
 	char *content;
 	char *location;
-} __file;
-
-struct _thread {
-	int tid;
-	pthread_t t;
-	pthread_mutex_t *mx;
-	thread *next, *prev;
+	sFile *next;
+	pthread_mutex_t *mutex;
 };
 
+typedef struct {
+	int tid;
+	pthread_t t;
+} thread;
 
 
-struct _command
+
+typedef struct
 {
     const char *name;
     void (*func)(int ac, char *av);
-};
+} cmd;
 
 #endif /* STRUCT_H_ */
