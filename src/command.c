@@ -39,40 +39,105 @@ void cmd_create(int ac, char *av) {
 	send(client_sock, buf, sizeof(buf), 0);
 }
 
+
+void iterator_init(iterator *it){
+	it->a=NULL;
+	it->b=file_list;
+	pthread_mutex_lock(it->b->mutex);
+}
+
+/*
+ * Return the next file in the list or null if at the end.
+ * If the end is reached, the iterator is already destoryed.
+ */
+sFile *iterator_next(iterator *it){
+	if (it->a != NULL)
+		pthread_mutex_unlock(it->a->mutex);
+	if (it->b->next==NULL)
+	{
+		pthread_mutex_unlock(it->b->mutex);
+		return NULL;
+	}
+
+	it->a=it->b;
+	it->b=it->b->next;
+	pthread_mutex_lock(it->b->mutex);
+	return it->b;
+}
+
+void iterator_destroy(iterator *it){
+	if (it->a != NULL)
+			pthread_mutex_unlock(it->a->mutex);
+	if (it->b != NULL)
+			pthread_mutex_unlock(it->b->mutex);
+}
+
 void cmd_list(int ac, char *av) {
+	iterator it;
+	iterator_init(&it);
+
 	sFile *list;
 	long num_files = file_count;
 	char *ack = (char*) malloc((sizeof(char*) * 12) + sizeof(long));
 	sprintf(ack, "ACK %d\n", file_count);
 	send(client_sock, ack, (int) strlen(ack), 0);
-	if (file_list != NULL) {
-		for (list = file_list; list->filename; list++) {
-			send(client_sock, list->filename, strlen(list->filename), 0);
-		}
+
+	// TODO: use temporary copy to get count correct
+	sFile *current;
+	while ((current=iterator_next(&it))!=NULL){
+		send(client_sock, current->filename, strlen(current->filename), 0);
 	}
 }
+
 void cmd_read(int ac, char *av) {
 	sFile *list;
-	char err[32] = "NOSUCHFILE";
+	char err[] = "NOSUCHFILE";
 	char *filename = strdup(av);
 	fprintf(stderr, "Filename: %s\n", filename);
 	char *fileInfo = (char*) malloc((sizeof(char*) * 1024));
 	char *fileContent = (char*) malloc((sizeof(char*) * 4096));
-	if (file_list != NULL) {
-		for (list = file_list; list->filename; list++) {
-			if ((stricmp(filename, list->filename) == 0)) {
-				sprintf(fileInfo, "FILECONTENT %s %d\n", list->filename,list->size);
-				sprintf(fileContent, "%s\n", list->content);
-				send(client_sock, fileInfo, (int) strlen(fileInfo), 0);
-				send(client_sock, fileInfo, (int) strlen(fileContent), 0);
-				return;
-			}
+
+	iterator it;
+	iterator_init(&it);
+
+	sFile *current;
+	while ((current=iterator_next(&it))!=NULL){
+		if ((stricmp(filename, current->filename) == 0)) {
+			sprintf(fileInfo, "FILECONTENT %s %d\n", current->filename,current->size);
+			sprintf(fileContent, "%s\n", current->content);
+			send(client_sock, fileInfo, (int) strlen(fileInfo), 0);
+			send(client_sock, fileInfo, (int) strlen(fileContent), 0);
+			iterator_destroy(&it);
+			return;
 		}
-		send(client_sock,err,(int) sizeof(err),0);
-		return;
 	}
+
+	send(client_sock,err,(int) sizeof(err),0);
 }
 
+void cmd_delete(int ac, char *av) {
+	sFile *list;
+	char err[] = "NOSUCHFILE";
+	char *filename = strdup(av);
+	fprintf(stderr, "Filename: %s\n", filename);
+	char *fileInfo = (char*) malloc((sizeof(char*) * 1024));
+	char *fileContent = (char*) malloc((sizeof(char*) * 4096));
+
+	iterator it;
+	iterator_init(&it);
+
+	sFile *current;
+	while ((current=iterator_next(&it))!=NULL){
+		if ((stricmp(filename, current->filename) == 0)) {
+			it.a->next=it.b->next;
+			iterator_destroy(&it);
+			// TODO: answer
+			return;
+		}
+	}
+
+	send(client_sock,err,(int) sizeof(err),0);
+}
 cmd *find_cmd(const char *name) {
 	cmd *c;
 	for (c = cmds; c->name; c++) {

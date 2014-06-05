@@ -37,13 +37,13 @@
 #include "command.h"
 
 
-/* variables */
+/* declare global variables */
 
-int sock;
-int client_sock;
+extern int sock;
+extern int client_sock;
 
-sFile *file_list;
-int file_count;
+extern sFile *file_list;
+extern int file_count;
 
 /* pp directives */
 
@@ -57,7 +57,7 @@ void print_start_msg(void);
 void start_server(void);
 void startup(void);
 void stop_server(void);
-void *doprocessing(thread *t);
+void *doprocessing(void *data);
 void parse(void);
 
 

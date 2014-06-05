@@ -7,6 +7,15 @@ int quitting;
 
 void start_client(const char *address);
 
+
+/* define global variables */
+int sock;
+int client_sock;
+
+sFile *file_list;
+int file_count;
+
+
 int main(int argc, char* argv[]) {
 	start_client("localhost");
 }

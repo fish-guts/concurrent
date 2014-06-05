@@ -7,6 +7,14 @@
 
 #include "main.h"
 
+/* define global variables */
+int sock;
+int client_sock;
+
+sFile *file_list;
+int file_count;
+
+
 /* our main server buffer */
 
 char serverbuf[4096];
@@ -51,13 +59,6 @@ void parse(void) {
 
 }
 
-void add_thread(thread *t) {
-	t->next = threadlist;
-	if (threadlist)
-		threadlist->prev = t;
-	threadlist = t;
-
-}
 
 void launch_app(char *argv[]) {
 	if ((strcmp(argv[1], "start")) == 0)
@@ -172,13 +173,7 @@ void start_server(void) {
 		} else {
 			/* This is the client process */
 
-			thread *t = scalloc(sizeof(thread), 1);
-			t->mx = &mx;
-			t->t = pthread_self();
-//pthread_mutex_init(&mx,NULL);
-			tid = pthread_create(&client_thread, NULL, doprocessing, &t);
-			t->tid = tid;
-			add_thread(t);
+			tid = pthread_create(&client_thread, NULL, doprocessing, NULL);
 			if (tid) {
 				fprintf(stderr, "Error creating thread: %d\n", tid);
 			}
@@ -186,19 +181,22 @@ void start_server(void) {
 	}
 }
 
-void *doprocessing(thread *t) {
+void *doprocessing(void *data) {
 	pthread_mutex_t *mx;
 	pthread_mutex_t *mxq;
 	int n, s;
 	char buf[100000];
 	bzero(buf, sizeof(buf));
+	file_list=malloc(sizeof(sFile)+1);
+	pthread_mutex_init(&(file_list->mutex),NULL);
+
 
 	if (n < 0) {
 		fprintf(stderr, "ERROR writing to socket");
 		exit(1);
 	}
 	while (!quitting) {
-		s = recv(client_sock, buf, sizeof(serverbuf), 0);
+		s = recv(client_sock, buf, sizeof(buf), 0);
 		if (s > 0) {
 			buf[s] = 0;
 // we use LF as a line breaker, its easier to parse the commands
@@ -212,7 +210,7 @@ void *doprocessing(thread *t) {
 		} else {
 			fprintf(stderr, "Client disconnected\n");
 			close(client_sock);
-			pthread_exit(t->t);
+			pthread_exit(0);
 
 		}
 	}
