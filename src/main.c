@@ -60,27 +60,8 @@ void parse(void) {
 }
 
 
-void launch_app(char *argv[]) {
-	if ((strcmp(argv[1], "start")) == 0)
-		startup();
-	else if ((strcmp(argv[1], "stop")) == 0)
-		stop_server();
-	else {
-		fprintf(stderr,
-				"Invalid Command: %s. Valid Commands are ./fileserver [start|stop]\n",
-				argv[1]);
-		exit(EXIT_FAILURE);
-	}
-}
-
 int main(int argc, char* argv[]) {
-	if (argc > 1)
-		launch_app(argv);
-	else {
-		fprintf(stderr,
-				"No argument supplied. Valid Argument are [start|stop]\n");
-		exit(EXIT_SUCCESS);
-	}
+	startup();
 	return 0;
 }
 
@@ -88,10 +69,6 @@ void print_start_msg(void) {
 	fprintf(stderr, "###############################\n");
 	fprintf(stderr, "Welcome to Severin'ŝ FileServer\n");
 	fprintf(stderr, "###############################\n");
-}
-
-void stop_server(void) {
-	exit(EXIT_SUCCESS);
 }
 
 void startup(void) {
@@ -120,25 +97,19 @@ void startup(void) {
 }
 
 void start_server(void) {
-	int s, len, rc;
+	int len, rc;
 	int tid;
-	long t;
-	char buf[100000];
-
 	struct sockaddr_in addr;
 	struct sockaddr_in client;
 	pthread_t client_thread;
-	pthread_mutex_t mx;
 
 	sock = socket(AF_INET, SOCK_STREAM, 0);
 
-	unsigned short port = PORT;
-
-// clear the struct
+	// clear the struct
 	memset((char*) &addr, 0, sizeof(addr));
 
 	fprintf(stderr, "\n\nStarting server...");
-// let's set some values
+	// let's set some values
 
 	/* type of socket created in socket() */
 	addr.sin_family = AF_INET;
@@ -182,19 +153,13 @@ void start_server(void) {
 }
 
 void *doprocessing(void *data) {
-	pthread_mutex_t *mx;
-	pthread_mutex_t *mxq;
-	int n, s;
+	int s;
 	char buf[100000];
 	bzero(buf, sizeof(buf));
 	file_list=malloc(sizeof(sFile)+1);
 	pthread_mutex_init(&(file_list->mutex),NULL);
 
 
-	if (n < 0) {
-		fprintf(stderr, "ERROR writing to socket");
-		exit(1);
-	}
 	while (!quitting) {
 		s = recv(client_sock, buf, sizeof(buf), 0);
 		if (s > 0) {
@@ -214,5 +179,4 @@ void *doprocessing(void *data) {
 
 		}
 	}
-	return -1;
 }

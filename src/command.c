@@ -42,8 +42,11 @@ void cmd_create(int ac, char *av) {
 
 void iterator_init(iterator *it){
 	it->a=NULL;
+	fprintf(stderr,"debug 1a\n");
 	it->b=file_list;
+	fprintf(stderr,"debug 1b\n");
 	pthread_mutex_lock(it->b->mutex);
+	fprintf(stderr,"debug 1c\n");
 }
 
 /*
@@ -75,15 +78,12 @@ void iterator_destroy(iterator *it){
 void cmd_list(int ac, char *av) {
 	iterator it;
 	iterator_init(&it);
-
-	sFile *list;
+	sFile *list = file_list;
 	long num_files = file_count;
-	char *ack = (char*) malloc((sizeof(char*) * 12) + sizeof(long));
+	char ack[32];
 	sprintf(ack, "ACK %d\n", file_count);
 	send(client_sock, ack, (int) strlen(ack), 0);
-
-	// TODO: use temporary copy to get count correct
-	sFile *current;
+	sFile *current = list;
 	while ((current=iterator_next(&it))!=NULL){
 		send(client_sock, current->filename, strlen(current->filename), 0);
 	}

@@ -51,12 +51,9 @@ extern int file_count;
 
 /* function prototypes */
 
-void add_thread(thread *t);
-void launch_app(char* argv[]);
 void print_start_msg(void);
 void start_server(void);
 void startup(void);
-void stop_server(void);
 void *doprocessing(void *data);
 void parse(void);
 
