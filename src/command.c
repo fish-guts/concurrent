@@ -38,6 +38,11 @@ int tokenize(char *buf) {
 void cmd_create(int s,int ac, char *av) {
 	char buf[13] = "Hallo, Welt";
 	send(s, buf, sizeof(buf), 0);
+	iterator it;
+	iterator_init(&it);
+	fprintf("av: %s\n",av);
+
+
 }
 
 void iterator_init(iterator *it){

@@ -9,12 +9,8 @@
 #define STRUCT_H_
 
 typedef struct _sFile sFile;
-typedef struct _sock_list sock_list;
 
-struct _sock_list {
-	int tid;
-	int sock;
-};
+
 
 struct _sFile {
 	char *filename;
@@ -24,10 +20,6 @@ struct _sFile {
 	pthread_mutex_t *mutex;
 };
 
-typedef struct {
-	int tid;
-	pthread_t t;
-} thread;
 
 typedef struct
 {
