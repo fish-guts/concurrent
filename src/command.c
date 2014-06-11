@@ -35,9 +35,9 @@ int tokenize(char *buf) {
 	return ac;
 }
 
-void cmd_create(int ac, char *av) {
+void cmd_create(int s,int ac, char *av) {
 	char buf[13] = "Hallo, Welt";
-	send(client_sock, buf, sizeof(buf), 0);
+	send(s, buf, sizeof(buf), 0);
 }
 
 void iterator_init(iterator *it){
@@ -71,13 +71,13 @@ void iterator_destroy(iterator *it){
 			pthread_mutex_unlock(&it->b->mutex);
 }
 
-void cmd_list(int ac, char *av) {
+void cmd_list(int s,int ac, char *av) {
 	iterator it;
 	iterator_init(&it);
 	int count = 0;
 	char ack[32];
 	sprintf(ack, "ACK %d\n", file_count);
-	send(client_sock, ack, (int) strlen(ack), 0);
+	send(s, ack, (int) strlen(ack), 0);
 	sFile *current = file_list;
 	// we need to count through all the items before someone changes it
 	while ((current=iterator_next(&it))!=NULL) {
@@ -85,12 +85,12 @@ void cmd_list(int ac, char *av) {
 	}
 	fprintf(stderr,"files found: %i\n",count);
 	while ((current=iterator_next(&it))!=NULL) {
-		send(client_sock, current->filename, strlen(current->filename), 0);
+		send(s, current->filename, strlen(current->filename), 0);
 	}
 	iterator_destroy(&it);
 }
 
-void cmd_read(int ac, char *av) {
+void cmd_read(int s,int ac, char *av) {
 	sFile *list;
 	char err[] = "NOSUCHFILE";
 	char *filename = strdup(av);
@@ -105,24 +105,20 @@ void cmd_read(int ac, char *av) {
 		if ((stricmp(filename, current->filename) == 0)) {
 			sprintf(fileInfo, "FILECONTENT %s %d\n", current->filename,current->size);
 			sprintf(fileContent, "%s\n", current->content);
-			send(client_sock, fileInfo, (int) strlen(fileInfo), 0);
-			send(client_sock, fileInfo, (int) strlen(fileContent), 0);
+			send(s, fileInfo, (int) strlen(fileInfo), 0);
+			send(s, fileInfo, (int) strlen(fileContent), 0);
 			iterator_destroy(&it);
 			return;
 		}
 	}
 
-	send(client_sock,err,(int) sizeof(err),0);
+	send(s,err,(int) sizeof(err),0);
 }
 
-void cmd_delete(int ac, char *av) {
-	sFile *list;
+void cmd_delete(int s,int ac, char *av) {
+	//sFile *list;
 	char err[] = "NOSUCHFILE";
 	char *filename = strdup(av);
-	fprintf(stderr, "Filename: %s\n", filename);
-	char *fileInfo = (char*) malloc((sizeof(char*) * 1024));
-	char *fileContent = (char*) malloc((sizeof(char*) * 4096));
-
 	iterator it;
 	iterator_init(&it);
 
@@ -136,7 +132,7 @@ void cmd_delete(int ac, char *av) {
 		}
 	}
 
-	send(client_sock,err,(int) sizeof(err),0);
+	send(s,err,(int) sizeof(err),0);
 }
 cmd *find_cmd(const char *name) {
 	cmd *c;

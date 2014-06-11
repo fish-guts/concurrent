@@ -9,6 +9,12 @@
 #define STRUCT_H_
 
 typedef struct _sFile sFile;
+typedef struct _sock_list sock_list;
+
+struct _sock_list {
+	int tid;
+	int sock;
+};
 
 struct _sFile {
 	char *filename;
@@ -26,7 +32,7 @@ typedef struct {
 typedef struct
 {
     const char *name;
-    void (*func)(int ac, char *av);
+    void (*func)(int s,int ac, char *av);
 } cmd;
 
 #endif /* STRUCT_H_ */

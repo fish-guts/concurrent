@@ -9,7 +9,6 @@
 
 /* define global variables */
 int sock;
-int client_sock;
 
 sFile *file_list = NULL;
 int file_count;
@@ -22,10 +21,12 @@ char serverbuf[4096];
 int quitting;
 int thread_count;
 
+sock_list socks[8192];
+
 /* our list containing our threads (clients) */
 
 
-void parse(void) {
+void parse(int s) {
 	char command[1024];
 	char buf[1024];
 	char err[1024];
@@ -34,6 +35,7 @@ void parse(void) {
 	int ac;
 	char **av;
 	cmd *ic;
+	fprintf(stderr,"debug 5\n");
 	strscpy(buf, serverbuf, sizeof(buf));
 	strscpy(fullcmd, serverbuf, sizeof(fullcmd));
 	if (!*buf)
@@ -51,11 +53,11 @@ void parse(void) {
 	/* we'd like to call our functions dynamically */
 	if ((ic = find_cmd(command))) {
 		if (ic->func)
-			ic->func(ac, fullcmd);
+			ic->func(s,ac, fullcmd);
 	} else {
 		sprintf(buf, "Unknown Command: %s\n", serverbuf);
 		fprintf(stderr, "%s", buf);
-		send(client_sock, buf, sizeof(buf), 0);
+		send(s, buf, sizeof(buf), 0);
 	}
 	free(av);
 
@@ -117,9 +119,7 @@ void start_server(void) {
 	/* type of socket created in socket() */
 	addr.sin_family = AF_INET;
 	addr.sin_addr.s_addr = INADDR_ANY;
-	/* 7000 is the port to use for connections */
 	addr.sin_port = htons((unsigned short) PORT);
-
 	inet_pton(AF_INET, "127.0.0.1", &addr.sin_addr);
 	/* bind the socket to the port specified above */
 
@@ -150,13 +150,15 @@ void start_server(void) {
 	while (!quitting) {
 		len = sizeof(struct sockaddr_in);
 
-		client_sock = accept(sock, (struct sockaddr *) &client, &len);
+		int client_sock = accept(sock, (struct sockaddr *) &client, &len);
 		if (client_sock < 0) {
 			fprintf(stderr, "Accept failed\n");
 		} else {
 			/* This is the client process */
-
-			tid = pthread_create(&threadlist[thread_count], NULL, doprocessing, NULL);
+			int *sock_ptr = (int *) malloc(sizeof(int));
+			*sock_ptr = client_sock;
+			tid = pthread_create(&threadlist[thread_count], NULL, doprocessing, sock_ptr);
+			pthread_detach(&threadlist[thread_count]);
 			thread_count++;
 			if (tid) {
 				fprintf(stderr, "Error creating thread: %d\n", tid);
@@ -165,27 +167,27 @@ void start_server(void) {
 	}
 }
 
-void *doprocessing(void *data) {
+void *doprocessing(void *client_socket) {
 	int s;
-	char buf[100000];
+	int csock = *((int *) client_socket);
+	char buf[4096];
 	bzero(buf, sizeof(buf));
-	fprintf(stderr,"new thread created with id: %i\n",pthread_self());
-
 	while (!quitting) {
-		s = recv(client_sock, buf, sizeof(buf), 0);
+		s = recv(csock, buf, sizeof(buf), 0);
 		if (s > 0) {
 			buf[s] = 0;
 			// we use LF as a line breaker, its easier to parse the commands
 			char *pch = strtok(buf, "\n");
 			while (pch != NULL) {
 				strcpy(serverbuf, pch);
-				parse();
+				fprintf(stderr,"debug 4\n");
+				parse(csock);
 				serverbuf[s] = 0;
 				pch = strtok(NULL, "\n");
 			}
 		} else {
 			fprintf(stderr, "Client disconnected\n");
-			close(client_sock);
+			close(csock);
 			pthread_exit(0);
 
 		}

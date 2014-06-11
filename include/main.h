@@ -40,10 +40,11 @@
 /* declare global variables */
 
 extern int sock;
-extern int client_sock;
 
 extern sFile *file_list;
 extern int file_count;
+
+extern sock_list socks[8192];
 
 /* pp directives */
 
@@ -55,7 +56,7 @@ void print_start_msg(void);
 void start_server(void);
 void startup(void);
 void *doprocessing(void *data);
-void parse(void);
+void parse(int s);
 
 
 #endif /* MAIN_H_ */
