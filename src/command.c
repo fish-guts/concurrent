@@ -36,7 +36,7 @@ int tokenize(char *buf) {
 }
 
 void cmd_create(int ac, char *av) {
-	char buf[13] = "Hallo, Welt\n";
+	char buf[13] = "Hallo, Welt";
 	send(client_sock, buf, sizeof(buf), 0);
 }
 
@@ -51,16 +51,13 @@ void iterator_init(iterator *it){
  * If the end is reached, the iterator is already destoryed.
  */
 sFile *iterator_next(iterator *it){
-	fprintf(stderr,"debug 1\n");
 	if (it->a != NULL)
 		pthread_mutex_unlock(&it->a->mutex);
-	fprintf(stderr,"debug 2\n");
 	if (it->b->next==NULL)
 	{
 		pthread_mutex_unlock(&it->b->mutex);
 		return NULL;
 	}
-
 	it->a=it->b;
 	it->b=it->b->next;
 	pthread_mutex_lock(it->b->mutex);
@@ -69,11 +66,10 @@ sFile *iterator_next(iterator *it){
 
 void iterator_destroy(iterator *it){
 	if (it->a != NULL)
-			pthread_mutex_unlock(it->a->mutex);
+			pthread_mutex_unlock(&it->a->mutex);
 	if (it->b != NULL)
-			pthread_mutex_unlock(it->b->mutex);
+			pthread_mutex_unlock(&it->b->mutex);
 }
-
 
 void cmd_list(int ac, char *av) {
 	iterator it;
@@ -83,7 +79,7 @@ void cmd_list(int ac, char *av) {
 	sprintf(ack, "ACK %d\n", file_count);
 	send(client_sock, ack, (int) strlen(ack), 0);
 	sFile *current = file_list;
-	// we need to count throug all the items before someone changes it
+	// we need to count through all the items before someone changes it
 	while ((current=iterator_next(&it))!=NULL) {
 		count++;
 	}
@@ -91,6 +87,7 @@ void cmd_list(int ac, char *av) {
 	while ((current=iterator_next(&it))!=NULL) {
 		send(client_sock, current->filename, strlen(current->filename), 0);
 	}
+	iterator_destroy(&it);
 }
 
 void cmd_read(int ac, char *av) {

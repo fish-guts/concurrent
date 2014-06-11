@@ -11,17 +11,19 @@
 int sock;
 int client_sock;
 
-sFile *file_list;
+sFile *file_list = NULL;
 int file_count;
 
+pthread_t threadlist[8192];
 
 /* our main server buffer */
 
 char serverbuf[4096];
 int quitting;
+int thread_count;
 
 /* our list containing our threads (clients) */
-thread *threadlist = NULL;
+
 
 void parse(void) {
 	char command[1024];
@@ -101,8 +103,9 @@ void start_server(void) {
 	int tid;
 	struct sockaddr_in addr;
 	struct sockaddr_in client;
-	pthread_t client_thread;
 
+	pthread_t client_thread;
+	thread_count = 0;
 	sock = socket(AF_INET, SOCK_STREAM, 0);
 
 	// clear the struct
@@ -141,8 +144,6 @@ void start_server(void) {
 	dummy->size = 8;
 	dummy->next = file_list;
 	file_list = dummy;
-
-	// init mutex
 	pthread_mutex_init(&dummy->mutex,NULL);
 
 	// the main server loop
@@ -155,7 +156,8 @@ void start_server(void) {
 		} else {
 			/* This is the client process */
 
-			tid = pthread_create(&client_thread, NULL, doprocessing, NULL);
+			tid = pthread_create(&threadlist[thread_count], NULL, doprocessing, NULL);
+			thread_count++;
 			if (tid) {
 				fprintf(stderr, "Error creating thread: %d\n", tid);
 			}
@@ -167,14 +169,13 @@ void *doprocessing(void *data) {
 	int s;
 	char buf[100000];
 	bzero(buf, sizeof(buf));
-	file_list=malloc(sizeof(sFile)+1);
-
+	fprintf(stderr,"new thread created with id: %i\n",pthread_self());
 
 	while (!quitting) {
 		s = recv(client_sock, buf, sizeof(buf), 0);
 		if (s > 0) {
 			buf[s] = 0;
-// we use LF as a line breaker, its easier to parse the commands
+			// we use LF as a line breaker, its easier to parse the commands
 			char *pch = strtok(buf, "\n");
 			while (pch != NULL) {
 				strcpy(serverbuf, pch);

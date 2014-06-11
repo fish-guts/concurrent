@@ -40,7 +40,6 @@ void *scalloc(long size, long l) {
 void *srealloc(void *oldptr, long newsize) {
 	void *buf;
 	if (!newsize) {
-		//log("srealloc: Illegal attempt to allocate 0 bytes");
 		newsize = 1;
 	}
 	buf = realloc(oldptr, newsize);
