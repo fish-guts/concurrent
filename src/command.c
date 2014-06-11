@@ -51,13 +51,16 @@ void iterator_init(iterator *it){
  * If the end is reached, the iterator is already destoryed.
  */
 sFile *iterator_next(iterator *it){
+	fprintf(stderr,"debug 1\n");
 	if (it->a != NULL)
-		pthread_mutex_unlock(it->a->mutex);
+		pthread_mutex_unlock(&it->a->mutex);
+	fprintf(stderr,"debug 2\n");
 	if (it->b->next==NULL)
 	{
-		pthread_mutex_unlock(it->b->mutex);
+		pthread_mutex_unlock(&it->b->mutex);
 		return NULL;
 	}
+
 	it->a=it->b;
 	it->b=it->b->next;
 	pthread_mutex_lock(it->b->mutex);
