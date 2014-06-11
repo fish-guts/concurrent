@@ -11,8 +11,8 @@ cmd cmds[] = {
 		{ "CREATE", cmd_create },
 		{ "LIST", cmd_list },
 		{ "READ", cmd_read },
-		{ "DELETE", NULL },
-		{ "RENAME", NULL }
+		{ "DELETE", cmd_delete },
+		{ "UPDATE", cmd_update }
 
 };
 
@@ -113,6 +113,10 @@ void cmd_read(int s,int ac, char *av) {
 	}
 
 	send(s,err,(int) sizeof(err),0);
+}
+
+void cmd_update(int s, int ac, char *av) {
+
 }
 
 void cmd_delete(int s,int ac, char *av) {
