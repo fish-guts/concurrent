@@ -41,14 +41,11 @@ void cmd_create(int ac, char *av) {
 }
 
 void iterator_init(iterator *it){
-	pthread_mutex_init(it->a->mutex,NULL);
-	pthread_mutex_init(it->b->mutex,NULL);
+	pthread_mutex_init(&it->a->mutex,NULL);
+	pthread_mutex_init(&it->b->mutex,NULL);
 	it->a=NULL;
-	fprintf(stderr,"debug 1a\n");
 	it->b=file_list;
-	fprintf(stderr,"debug 1b\n");
-	pthread_mutex_lock(it->b->mutex);
-	fprintf(stderr,"debug 1c\n");
+	pthread_mutex_lock(&it->b->mutex);
 }
 
 /*
@@ -63,7 +60,6 @@ sFile *iterator_next(iterator *it){
 		pthread_mutex_unlock(it->b->mutex);
 		return NULL;
 	}
-
 	it->a=it->b;
 	it->b=it->b->next;
 	pthread_mutex_lock(it->b->mutex);
@@ -102,7 +98,6 @@ void cmd_read(int ac, char *av) {
 	fprintf(stderr, "Filename: %s\n", filename);
 	char *fileInfo = (char*) malloc((sizeof(char*) * 1024));
 	char *fileContent = (char*) malloc((sizeof(char*) * 4096));
-
 	iterator it;
 	iterator_init(&it);
 
