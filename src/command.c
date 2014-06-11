@@ -71,20 +71,21 @@ void iterator_destroy(iterator *it){
 			pthread_mutex_unlock(it->b->mutex);
 }
 
+
 void cmd_list(int ac, char *av) {
 	iterator it;
 	iterator_init(&it);
-	sFile *list = file_list;
+	int count = 0;
 	char ack[32];
 	sprintf(ack, "ACK %d\n", file_count);
 	send(client_sock, ack, (int) strlen(ack), 0);
-
-	sFile *current = list;
-	//
-	while ((current=iterator_next(&it))!=NULL){
-
-		}
-	while ((current=iterator_next(&it))!=NULL){
+	sFile *current = file_list;
+	// we need to count throug all the items before someone changes it
+	while ((current=iterator_next(&it))!=NULL) {
+		count++;
+	}
+	fprintf(stderr,"files found: %i\n",count);
+	while ((current=iterator_next(&it))!=NULL) {
 		send(client_sock, current->filename, strlen(current->filename), 0);
 	}
 }
