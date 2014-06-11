@@ -134,7 +134,18 @@ void start_server(void) {
 		fprintf(stderr, "Server started successfully, listening on port %d\n",
 		PORT);
 	}
-// the main server loop
+	//server is up, let's create a dummy file
+	sFile *dummy = scalloc(sizeof(sFile),1);
+	dummy->content = sstrdup("__dummy");
+	dummy->filename = sstrdup("__dummy");
+	dummy->size = 8;
+	dummy->next = file_list;
+	file_list = dummy;
+
+	// init mutex
+	pthread_mutex_init(&dummy->mutex,NULL);
+
+	// the main server loop
 	while (!quitting) {
 		len = sizeof(struct sockaddr_in);
 

@@ -18,7 +18,7 @@ TEST_OBJS = obj/client.o
 LIBS = pthread
 
 #bin
-EXECUTABLES = server client 
+EXECUTABLES = run test 
 
 #include
 INCLUDE := include
@@ -43,7 +43,7 @@ server: $(RUN_OBJS)
 	
 	@echo 'done...'
 	@echo 'Invoking: GCC C Linker'
-	$(CC)  -o "server" $(RUN_OBJS) -l$(LIBS)
+	$(CC)  -o "run" $(RUN_OBJS) -l$(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 	
@@ -69,7 +69,7 @@ client: $(TEST_OBJS)
 
 	@echo 'done...'
 	@echo 'Invoking: GCC C Linker'
-	$(CC)  -o "client" $(TEST_OBJS) -l$(LIBS)
+	$(CC)  -o "test" $(TEST_OBJS) -l$(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 	

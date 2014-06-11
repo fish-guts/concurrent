@@ -41,8 +41,6 @@ void cmd_create(int ac, char *av) {
 }
 
 void iterator_init(iterator *it){
-	pthread_mutex_init(&it->a->mutex,NULL);
-	pthread_mutex_init(&it->b->mutex,NULL);
 	it->a=NULL;
 	it->b=file_list;
 	pthread_mutex_lock(&it->b->mutex);
