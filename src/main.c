@@ -21,8 +21,6 @@ char serverbuf[4096];
 int quitting;
 int thread_count;
 
-sock_list socks[8192];
-
 /* our list containing our threads (clients) */
 
 
@@ -35,7 +33,6 @@ void parse(int s) {
 	int ac;
 	char **av;
 	cmd *ic;
-	fprintf(stderr,"debug 5\n");
 	strscpy(buf, serverbuf, sizeof(buf));
 	strscpy(fullcmd, serverbuf, sizeof(fullcmd));
 	if (!*buf)
@@ -48,12 +45,12 @@ void parse(int s) {
 	} else
 		pch = buf + strlen(buf);
 	strscpy(command, buf, sizeof(command));
-	ac = tokenize(fullcmd);
+	ac = tokenize(fullcmd,&av);
 
 	/* we'd like to call our functions dynamically */
 	if ((ic = find_cmd(command))) {
 		if (ic->func)
-			ic->func(s,ac, fullcmd);
+			ic->func(s,ac,av);
 	} else {
 		sprintf(buf, "Unknown Command: %s\n", serverbuf);
 		fprintf(stderr, "%s", buf);

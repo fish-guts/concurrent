@@ -20,27 +20,53 @@ cmd cmds[] = {
 /**
  * 	handle the server's split a message line from the server
  */
-int tokenize(char *buf) {
-	int ac = 0;
-	char delimiter[] = " ";
-	char *ptr;
-
-	ptr = strtok(buf, delimiter);
-
-
-	while (ptr != NULL) {
-		ac++;
-		ptr = strtok(NULL, delimiter);
-	}
-	return ac;
+int tokenize(char *buf, char ***argv)
+{
+    int argvsize = 8;
+    int argc = 0;
+    char *pch;
+    *argv = smalloc(sizeof(char*) * argvsize);
+    while (*buf)
+    {
+		if(argc == argvsize)
+		{
+		    argvsize += 8;
+	    	*argv = srealloc(*argv, sizeof(char*) * argvsize);
+		}
+		if (*buf == ':')
+		{
+		    (*argv)[argc++] = buf+1;
+	    	buf = "";
+		}
+		else
+		{
+		    pch = strpbrk(buf, " ");
+	    	if(pch)
+	    	{
+				*pch++ = 0;
+				while(isspace(*pch))
+				{
+			    	pch++;
+				}
+	    	}
+	    	else
+	    	{
+				pch = buf + strlen(buf);
+	    	}
+	    	(*argv)[argc++] = buf;
+	    	buf = pch;
+		}
+    }
+    return argc;
 }
 
-void cmd_create(int s,int ac, char *av) {
+
+void cmd_create(int s,int ac, char **av) {
 	char buf[13] = "Hallo, Welt";
 	send(s, buf, sizeof(buf), 0);
 	iterator it;
 	iterator_init(&it);
-	fprintf("av: %s\n",av);
+	fprintf(stderr,"av: %s\n",av[0]);
 
 
 }
@@ -76,7 +102,7 @@ void iterator_destroy(iterator *it){
 			pthread_mutex_unlock(&it->b->mutex);
 }
 
-void cmd_list(int s,int ac, char *av) {
+void cmd_list(int s,int ac, char **av) {
 	iterator it;
 	iterator_init(&it);
 	int count = 0;
@@ -95,7 +121,7 @@ void cmd_list(int s,int ac, char *av) {
 	iterator_destroy(&it);
 }
 
-void cmd_read(int s,int ac, char *av) {
+void cmd_read(int s,int ac, char **av) {
 	sFile *list;
 	char err[] = "NOSUCHFILE";
 	char *filename = strdup(av);
@@ -120,11 +146,11 @@ void cmd_read(int s,int ac, char *av) {
 	send(s,err,(int) sizeof(err),0);
 }
 
-void cmd_update(int s, int ac, char *av) {
+void cmd_update(int s, int ac, char **av) {
 
 }
 
-void cmd_delete(int s,int ac, char *av) {
+void cmd_delete(int s,int ac, char **av) {
 	//sFile *list;
 	char err[] = "NOSUCHFILE";
 	char *filename = strdup(av);

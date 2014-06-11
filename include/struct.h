@@ -24,7 +24,7 @@ struct _sFile {
 typedef struct
 {
     const char *name;
-    void (*func)(int s,int ac, char *av);
+    void (*func)(int s,int ac, char **av);
 } cmd;
 
 #endif /* STRUCT_H_ */

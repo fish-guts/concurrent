@@ -44,7 +44,6 @@ extern int sock;
 extern sFile *file_list;
 extern int file_count;
 
-extern sock_list socks[8192];
 
 /* pp directives */
 
