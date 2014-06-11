@@ -27,6 +27,7 @@ int tokenize(char *buf) {
 
 	ptr = strtok(buf, delimiter);
 
+
 	while (ptr != NULL) {
 		ac++;
 		ptr = strtok(NULL, delimiter);
@@ -39,8 +40,9 @@ void cmd_create(int ac, char *av) {
 	send(client_sock, buf, sizeof(buf), 0);
 }
 
-
 void iterator_init(iterator *it){
+	pthread_mutex_init(it->a->mutex,NULL);
+	pthread_mutex_init(it->b->mutex,NULL);
 	it->a=NULL;
 	fprintf(stderr,"debug 1a\n");
 	it->b=file_list;
@@ -79,11 +81,15 @@ void cmd_list(int ac, char *av) {
 	iterator it;
 	iterator_init(&it);
 	sFile *list = file_list;
-	long num_files = file_count;
 	char ack[32];
 	sprintf(ack, "ACK %d\n", file_count);
 	send(client_sock, ack, (int) strlen(ack), 0);
+
 	sFile *current = list;
+	//
+	while ((current=iterator_next(&it))!=NULL){
+
+		}
 	while ((current=iterator_next(&it))!=NULL){
 		send(client_sock, current->filename, strlen(current->filename), 0);
 	}

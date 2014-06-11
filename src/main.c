@@ -157,7 +157,6 @@ void *doprocessing(void *data) {
 	char buf[100000];
 	bzero(buf, sizeof(buf));
 	file_list=malloc(sizeof(sFile)+1);
-	pthread_mutex_init(&(file_list->mutex),NULL);
 
 
 	while (!quitting) {

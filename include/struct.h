@@ -24,8 +24,6 @@ typedef struct {
 	pthread_t t;
 } thread;
 
-
-
 typedef struct
 {
     const char *name;
