@@ -13,6 +13,8 @@
 
 /* function prototypes */
 
+
+int isnum(char *value);
 int _stricmp(const char *str1, const char *str2);
 char *strscpy(char *d, const char *s, size_t len);
 char *sstrdup(const char *s);

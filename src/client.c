@@ -50,7 +50,6 @@ void start_client(const char *address) {
 	send(sock,"Hallo Server\n",BUF_SIZE,0);
 	int i = 0;
 	while(!quitting) {
-
 		fgets(input, sizeof(input), stdin);
 		if(send(sock,input,sizeof(input),0)<0) {
 			fprintf(stderr,"Error sending data: %s\n",errno);

@@ -8,6 +8,14 @@
 #include "main.h"
 
 
+int isnum(char *value) {
+	char *ptr;
+	for (ptr = value; *ptr; ptr++) {
+		if (!isdigit(*ptr))
+			return 0;
+	}
+	return 1;
+}
 
 int _stricmp(const char *str1, const char *str2) {
 	register signed char __res;

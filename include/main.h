@@ -55,7 +55,7 @@ void print_start_msg(void);
 void start_server(void);
 void startup(void);
 void *doprocessing(void *data);
-void parse(int s);
+void process(int s);
 
 
 #endif /* MAIN_H_ */

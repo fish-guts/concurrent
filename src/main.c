@@ -24,7 +24,7 @@ int thread_count;
 /* our list containing our threads (clients) */
 
 
-void parse(int s) {
+void process(int s) {
 	char command[1024];
 	char buf[1024];
 	char err[1024];
@@ -52,12 +52,11 @@ void parse(int s) {
 		if (ic->func)
 			ic->func(s,ac,av);
 	} else {
-		sprintf(buf, "Unknown Command: %s\n", serverbuf);
+		sprintf(buf, "Unknown command: %s\n", serverbuf);
 		fprintf(stderr, "%s", buf);
 		send(s, buf, sizeof(buf), 0);
 	}
 	free(av);
-
 }
 
 
@@ -177,8 +176,8 @@ void *doprocessing(void *client_socket) {
 			char *pch = strtok(buf, "\n");
 			while (pch != NULL) {
 				strcpy(serverbuf, pch);
-				fprintf(stderr,"debug 4\n");
-				parse(csock);
+
+				process(csock);
 				serverbuf[s] = 0;
 				pch = strtok(NULL, "\n");
 			}

@@ -20,9 +20,10 @@ void cmd_list(int s,int ac, char **av);
 void cmd_read(int s,int ac, char **av);
 void cmd_update(int s, int ac, char **av);
 void cmd_delete(int s,int ac, char **av);
-int tokenize(char *buf, char ***argv);
 void interator_init(iterator *it);
 sFile *iterator_next(iterator *it);
+int tokenize(char *buf, char ***argv);
+
 
 
 
