@@ -25,7 +25,7 @@ void start_client(const char *address) {
 	struct sockaddr_in server;
 	int s;
 	char buf[BUF_SIZE];
-	char input[BUF_SIZE];
+	char input[256];
 	sock = socket(AF_INET, SOCK_STREAM, 0);
 	if ((he = gethostbyname(address)) == NULL) {
 		fprintf(stderr,"error resolving hostname..");
@@ -57,7 +57,7 @@ void start_client(const char *address) {
 		s = recv(sock, buf, sizeof(buf),0);
 		if(s>0) {
 			buf[s] = 0;
-			fprintf(stderr,"Message from Server: %s\n",buf);
+			fprintf(stderr,"%s\n",buf);
 		} else {
 			fprintf(stderr,"Error in recv: %s\n",errno);
 		}

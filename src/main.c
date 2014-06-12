@@ -167,6 +167,7 @@ void *doprocessing(void *client_socket) {
 	int s;
 	int csock = *((int *) client_socket);
 	char buf[4096];
+	char client_buf[4096];
 	bzero(buf, sizeof(buf));
 	while (!quitting) {
 		s = recv(csock, buf, sizeof(buf), 0);

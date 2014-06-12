@@ -7,6 +7,8 @@
 
 #include "main.h"
 
+#define BUFSIZE 1045876
+
 cmd cmds[] = { { "CREATE", cmd_create }, { "LIST", cmd_list }, { "READ",
 		cmd_read }, { "DELETE", cmd_delete }, { "UPDATE", cmd_update }
 
@@ -50,21 +52,33 @@ void cmd_create(int s, int ac, char **av) {
 	char err[64] = "Usage: CREATE <FILENAME> <LENGTH>\n<CONTENT>";
 	char suc[] = "FILECREATED\n";
 	char ext[] = "FILEEXISTS\n";
-	iterator it;
-	iterator_init(&it);
-
+	int nread;
+	int done = 0;
+	char buf[BUFSIZE] = {0};
+	char con[BUFSIZE];
+	size_t buf_idx = 0;
 	if (ac < 3) {
 		send(s, err, sizeof(err), 0);
 		return;
 	} else if (!isnum(av[2])) {
 		send(s, err, sizeof(err), 0);
 		return;
-	}
-	else {
+	} else {
+		//wait for the content
+		while (buf_idx < BUFSIZE && 1 == recv(s, &buf[buf_idx],1,0)) {
+		    if (buf_idx > 0  && '\n' == buf[buf_idx] &&  '\n' == buf[buf_idx - 1]) {
+		    	fprintf(stderr,"Content: %s\n",&buf[buf_idx]);
+		        break;
+		    }
+		    buf_idx++;
+		}
+		strcpy(con,buf);
+		iterator it;
+		iterator_init(&it);
 		sFile *current = file_list;
 		// we need to count through all the items before someone changes it
 		while ((current = iterator_next(&it)) != NULL) {
-			if(stricmp(current->filename,av[1])==0) {
+			if (stricmp(current->filename, av[1]) == 0) {
 				send(s, ext, sizeof(ext), 0);
 				return;
 			}
@@ -72,12 +86,9 @@ void cmd_create(int s, int ac, char **av) {
 		sFile *f = scalloc(sizeof(sFile), 1);
 		f->filename = sstrdup(av[1]);
 		f->size = atoi(av[2]);
-		f->content = sstrdup(av[3]);
-
+		f->content = sstrdup(con);
 		f->next = file_list;
 		file_list = f;
-
-
 
 		send(s, suc, sizeof(suc), 0);
 	}
