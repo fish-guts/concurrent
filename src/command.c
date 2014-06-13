@@ -59,8 +59,9 @@ void cmd_create(int s, int ac, char **av) {
 		sFile *f = scalloc(sizeof(sFile), 1);
 		f->filename = sstrdup(av[1]);
 		f->size = contentSize;
-		f->content = (char *) buf;
+		f->content = sstrdup(buf);
 		f->next = NULL;
+		fprintf(stderr,"content: %s\n",f->content);
 		pthread_mutex_init(&f->mutex,NULL);
 		it.b->next=f;
 
@@ -114,26 +115,26 @@ void cmd_list(int s, int ac, char **av) {
 }
 
 void cmd_read(int s, int ac, char **av) {
-	char err[] = "NOSUCHFILE";
+	char err[] = "NOSUCHFILE\n";
 	char *filename = strdup(av[1]);
-	fprintf(stderr, "Filename: %s\n", filename);
 	char *fileInfo = (char*) malloc((sizeof(char*) * 1024));
 	char *fileContent = (char*) malloc((sizeof(char*) * 4096));
 	iterator it;
+
 	iterator_init(&it);
 	sFile *current;
 	while ((current = iterator_next(&it)) != NULL) {
 		if ((stricmp(filename, current->filename) == 0)) {
-			sprintf(fileInfo, "FILECONTENT %s %ld\n", current->filename,
-					current->size);
+			sprintf(fileInfo, "READ %s\n", current->filename);
 			sprintf(fileContent, "%s\n", current->content);
 			send(s, fileInfo, (int) strlen(fileInfo), 0);
-			send(s, fileInfo, (int) strlen(fileContent), 0);
+			send(s, fileContent, (int) strlen(fileContent), 0);
 			iterator_destroy(&it);
 			return;
 		}
 	}
 	send(s, err, (int) sizeof(err), 0);
+	iterator_destroy(&it);
 }
 
 void cmd_update(int s, int ac, char **av) {
