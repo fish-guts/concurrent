@@ -24,7 +24,7 @@ int thread_count;
 /* our list containing our threads (clients) */
 
 
-void process(int s) {
+void process(int s, char *clientbuf) {
 	char command[1024];
 	char buf[1024];
 	char err[1024];
@@ -33,8 +33,8 @@ void process(int s) {
 	int ac;
 	char **av;
 	cmd *ic;
-	strscpy(buf, serverbuf, sizeof(buf));
-	strscpy(fullcmd, serverbuf, sizeof(fullcmd));
+	strscpy(buf, clientbuf, sizeof(buf));
+	strscpy(fullcmd, clientbuf, sizeof(fullcmd));
 	if (!*buf)
 		return;
 	pch = strpbrk(buf, " ");
@@ -102,7 +102,6 @@ void start_server(void) {
 	struct sockaddr_in addr;
 	struct sockaddr_in client;
 
-	pthread_t client_thread;
 	thread_count = 0;
 	sock = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -135,8 +134,8 @@ void start_server(void) {
 	}
 	//server is up, let's create a dummy file
 	sFile *dummy = scalloc(sizeof(sFile),1);
-	dummy->content = sstrdup("__dummy");
-	dummy->filename = sstrdup("__dummy");
+	dummy->content = sstrdup("HEADER");
+	dummy->filename = sstrdup("HEADER");
 	dummy->size = 8;
 	dummy->next = file_list;
 	file_list = dummy;
@@ -154,7 +153,7 @@ void start_server(void) {
 			int *sock_ptr = (int *) malloc(sizeof(int));
 			*sock_ptr = client_sock;
 			tid = pthread_create(&threadlist[thread_count], NULL, doprocessing, sock_ptr);
-			pthread_detach(&threadlist[thread_count]);
+			pthread_detach(threadlist[thread_count]);
 			thread_count++;
 			if (tid) {
 				fprintf(stderr, "Error creating thread: %d\n", tid);
@@ -176,10 +175,10 @@ void *doprocessing(void *client_socket) {
 			// we use LF as a line breaker, its easier to parse the commands
 			char *pch = strtok(buf, "\n");
 			while (pch != NULL) {
-				strcpy(serverbuf, pch);
+				strcpy(client_buf, pch);
 
-				process(csock);
-				serverbuf[s] = 0;
+				process(csock,client_buf);
+				client_buf[s] = 0;
 				pch = strtok(NULL, "\n");
 			}
 		} else {
@@ -189,4 +188,5 @@ void *doprocessing(void *client_socket) {
 
 		}
 	}
+	return -1;
 }

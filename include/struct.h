@@ -17,7 +17,7 @@ struct _sFile {
 	size_t size;
 	char *content;
 	sFile *next;
-	pthread_mutex_t *mutex;
+	pthread_mutex_t mutex;
 };
 
 
