@@ -64,7 +64,7 @@ void cmd_create(int s, int ac, char **av) {
 		fprintf(stderr,"content: %s\n",f->content);
 		pthread_mutex_init(&f->mutex,NULL);
 		it.b->next=f;
-
+		pthread_mutex_destroy(&f->mutex);
 		iterator_destroy(&it);
 
 		printf("sending success\n");
@@ -74,7 +74,8 @@ void cmd_create(int s, int ac, char **av) {
 }
 
 void cmd_delete(int s, int ac, char **av) {
-	char err[] = "NOSUCHFILE";
+	char err[] = "NOSUCHFILE\n";
+	char suc[] = "DELETED\n";
 	char *filename = strdup(av[1]);
 	iterator it;
 	iterator_init(&it);
@@ -82,9 +83,11 @@ void cmd_delete(int s, int ac, char **av) {
 	sFile *current;
 	while ((current = iterator_next(&it)) != NULL) {
 		if ((stricmp(filename, current->filename) == 0)) {
+			pthread_mutex_init(&current->mutex,NULL);
 			it.a->next = it.b->next;
+			pthread_mutex_destroy(&current->mutex);
 			iterator_destroy(&it);
-			// TODO: answer
+			send(s, suc, sizeof(suc), 0);
 			return;
 		}
 	}
@@ -138,7 +141,49 @@ void cmd_read(int s, int ac, char **av) {
 }
 
 void cmd_update(int s, int ac, char **av) {
+	char err[64] = "Usage: UPDATE <FILENAME> <LENGTH>\n<CONTENT>\n";
+	char suc[] = "UPDATED\n";
+	char notfound[] = "NOSUCHFILE\n";
+	void * buf;
+	printf("enter cmd_update() \n");
+	if (ac < 3) {
+		send(s, err, sizeof(err), 0);
+		return;
+	} else if (!isnum(av[2])) {
+		send(s, err, sizeof(err), 0);
+		return;
+	} else {
+		// read the content
 
+		printf("search file\n");
+		// search for the file
+		iterator it;
+		iterator_init(&it);
+		sFile *current = file_list;
+		if (it.b->next!=NULL)
+			while ((current = iterator_next(&it)) != NULL) {
+				if (stricmp(current->filename, av[1]) == 0) {
+					pthread_mutex_init(&current->mutex,NULL);
+					// file found, updating
+					int contentSize=atoi(av[2]);
+					buf=smalloc(contentSize);
+					recv(s,buf,contentSize,0);
+					current->filename = sstrdup(av[1]);
+					current->size = contentSize;
+					current->content = sstrdup(buf);
+					pthread_mutex_destroy(&current->mutex);
+					iterator_destroy(&it);
+					send(s, suc, sizeof(suc), 0);
+					return;
+				}
+				if (it.b->next==NULL)
+					break;
+			}
+
+		// file not found, send error
+		send(s, notfound, sizeof(notfound), 0);
+		iterator_destroy(&it);
+	}
 }
 
 cmd *find_cmd(const char *name) {
