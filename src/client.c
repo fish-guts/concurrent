@@ -54,12 +54,14 @@ void start_client(const char *address) {
 		if(send(sock,input,sizeof(input),0)<0) {
 			fprintf(stderr,"Error sending data: %s\n",errno);
 		}
-		s = recv(sock, buf, sizeof(buf),0);
+		printf("reading from server\n");
+		s = recv(sock, buf, sizeof(buf),MSG_DONTWAIT);
+		printf("received %i bytes\n",s);
 		if(s>0) {
 			buf[s] = 0;
 			fprintf(stderr,"%s\n",buf);
 		} else {
-			fprintf(stderr,"Error in recv: %s\n",errno);
+			fprintf(stderr,"Error in recv: %i\n",errno);
 		}
 	}
 }
