@@ -54,9 +54,10 @@ void cmd_create(int s, int ac, char **av) {
 	char ext[] = "FILEEXISTS\n";
 	int nread;
 	int done = 0;
-	char buf[BUFSIZE] = {0};
-	char con[BUFSIZE];
+	void * buf;
 	size_t buf_idx = 0;
+
+	printf("enter cmd_create() \n");
 	if (ac < 3) {
 		send(s, err, sizeof(err), 0);
 		return;
@@ -64,33 +65,45 @@ void cmd_create(int s, int ac, char **av) {
 		send(s, err, sizeof(err), 0);
 		return;
 	} else {
-		//wait for the content
-		while (buf_idx < BUFSIZE && 1 == recv(s, &buf[buf_idx],1,0)) {
-		    if (buf_idx > 0  && '\n' == buf[buf_idx] &&  '\n' == buf[buf_idx - 1]) {
-		    	fprintf(stderr,"Content: %s\n",&buf[buf_idx]);
-		        break;
-		    }
-		    buf_idx++;
-		}
-		strcpy(con,buf);
+		// read the content
+		int contentSize=atoi(av[2]);
+		printf("reading %i\n",contentSize);
+		buf=smalloc(contentSize);
+		recv(s,buf,contentSize,0);
+
+		printf("search file\n");
+		// search for the file
 		iterator it;
 		iterator_init(&it);
 		sFile *current = file_list;
-		// we need to count through all the items before someone changes it
-		while ((current = iterator_next(&it)) != NULL) {
-			if (stricmp(current->filename, av[1]) == 0) {
-				send(s, ext, sizeof(ext), 0);
-				return;
+		if (it.b->next!=NULL)
+			while ((current = iterator_next(&it)) != NULL) {
+				if (stricmp(current->filename, av[1]) == 0) {
+					// file found, send error and abort
+					iterator_destroy(&it);
+					free(buf);
+					send(s, ext, sizeof(ext), 0);
+					return;
+				}
+				if (it.b->next==NULL)
+					break;
 			}
-		}
+
+		// file not found, create new one
+		printf("creating file %s\n",av[1]);
 		sFile *f = scalloc(sizeof(sFile), 1);
 		f->filename = sstrdup(av[1]);
-		f->size = atoi(av[2]);
-		f->content = sstrdup(con);
-		f->next = file_list;
-		file_list = f;
+		f->size = contentSize;
+		f->content = (char *) buf;
+		f->next = NULL;
+		pthread_mutex_init(&(f->mutex),NULL);
+		it.b->next=f;
 
+		iterator_destroy(&it);
+
+		printf("sending success\n");
 		send(s, suc, sizeof(suc), 0);
+		printf("leave cmd_create() \n");
 	}
 }
 
@@ -113,7 +126,7 @@ sFile *iterator_next(iterator *it) {
 	}
 	it->a = it->b;
 	it->b = it->b->next;
-	pthread_mutex_lock(it->b->mutex);
+	pthread_mutex_lock(&it->b->mutex);
 	return it->b;
 }
 
@@ -125,22 +138,23 @@ void iterator_destroy(iterator *it) {
 }
 
 void cmd_list(int s, int ac, char **av) {
+	printf("enter cmd_list()\n");
 	iterator it;
-	iterator_init(&it);
 	int count = 0;
 	char ack[32];
 	sprintf(ack, "ACK %d\n", file_count);
 	send(s, ack, (int) strlen(ack), 0);
 	sFile *current = file_list;
+	printf("iterating\n");
 	// we need to count through all the items before someone changes it
+	iterator_init(&it);
 	while ((current = iterator_next(&it)) != NULL) {
+		printf("found %s\n",current->filename);
+		send(s, current->filename, strlen(current->filename), 0);
 		count++;
 	}
 	fprintf(stderr, "files found: %i\n", count);
-	while ((current = iterator_next(&it)) != NULL) {
-		send(s, current->filename, strlen(current->filename), 0);
-	}
-	iterator_destroy(&it);
+	printf("leave cmd_list()\n");
 }
 
 void cmd_read(int s, int ac, char **av) {
