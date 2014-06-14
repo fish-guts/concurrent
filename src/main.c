@@ -90,8 +90,9 @@ void process(int s, char *clientbuf) {
 			;
 	} else
 		pch = buf + strlen(buf);
+
 	strscpy(command, buf, sizeof(command));
-	ac = tokenize(command,&av);
+	ac = tokenize(clientbuf,&av);
 
 	/* we'd like to call our functions dynamically */
 	if ((ic = find_cmd(command))) {

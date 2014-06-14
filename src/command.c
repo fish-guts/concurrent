@@ -26,6 +26,7 @@ void cmd_create(int s, int ac, char **av) {
 	char suc[] = "FILECREATED\n";
 	char ext[] = "FILEEXISTS\n";
 	void * buf;
+	fprintf(stderr,"ac: %i\n",ac);
 	if (ac < 3) {
 		send(s, err, sizeof(err), 0);
 		return;
@@ -65,7 +66,7 @@ void cmd_create(int s, int ac, char **av) {
 		it.b->next=f;
 		pthread_mutex_destroy(&f->mutex);
 		iterator_destroy(&it);
-		//done, send reponse
+		//done, send response
 		send(s, suc, sizeof(suc), 0);
 	}
 }
