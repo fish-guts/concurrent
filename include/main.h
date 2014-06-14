@@ -51,11 +51,12 @@ extern int file_count;
 
 /* function prototypes */
 
+void *doprocessing(void *data);
 void print_start_msg(void);
+void process(int s, char *clientbuf);
 void start_server(void);
 void startup(void);
-void *doprocessing(void *data);
-void process(int s, char *clientbuf);
+
 
 
 #endif /* MAIN_H_ */

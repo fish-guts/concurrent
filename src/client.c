@@ -15,11 +15,17 @@ int client_sock;
 sFile *file_list;
 int file_count;
 
-
+/********************************************************************/
+/**
+ * main routine
+ */
 int main(int argc, char* argv[]) {
 	start_client("localhost");
 }
-
+/********************************************************************/
+/**
+ * fire up the client
+ */
 void start_client(const char *address) {
 	struct hostent *he;
 	struct sockaddr_in server;
@@ -65,4 +71,3 @@ void start_client(const char *address) {
 		}
 	}
 }
-

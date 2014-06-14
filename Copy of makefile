@@ -25,7 +25,7 @@ INCLUDE := include
 
 
 # All Target
-all: server client
+all: server
 
 #run Target
 

@@ -14,13 +14,15 @@ typedef struct {
 } iterator;
 
 
-cmd *find_cmd(const char *name);
 void cmd_create(int s,int ac, char **av);
+void cmd_delete(int s,int ac, char **av);
+void cmd_exit(int s,int ac, char **av);
 void cmd_list(int s,int ac, char **av);
 void cmd_read(int s,int ac, char **av);
 void cmd_update(int s, int ac, char **av);
-void cmd_delete(int s,int ac, char **av);
-void interator_init(iterator *it);
+cmd *find_cmd(const char *name);
+void iterator_init(iterator *it);
+void iterator_destroy(iterator *it);
 sFile *iterator_next(iterator *it);
 int tokenize(char *buf, char ***argv);
 

@@ -11,30 +11,76 @@
 int sock;
 
 sFile *file_list = NULL;
-int file_count;
 
 pthread_t threadlist[8192];
 
 /* our main server buffer */
 
-char serverbuf[4096];
 int quitting;
 int thread_count;
 
-/* our list containing our threads (clients) */
+/********************************************************************/
+/**
+ * the thread processing routine, every client will run this routine
+ */
+void *doprocessing(void *client_socket) {
+	int s;
+	int csock = *((int *) client_socket);
+	char buf[4096];
+	char client_buf[4096];
+	bzero(buf, sizeof(buf));
+	while (!quitting) {
+		s = recv(csock, buf, sizeof(buf), 0);
+		if (s > 0) {
+			buf[s] = 0;
+			// we use LF as a line breaker, its easier to parse the commands
+			char *pch = strtok(buf, "\n");
+			while (pch != NULL) {
+				strcpy(client_buf, pch);
 
+				process(csock,client_buf);
+				client_buf[s] = 0;
+				pch = strtok(NULL, "\n");
+			}
+		} else {
+			fprintf(stderr, "Client disconnected\n");
+			close(csock);
+			pthread_exit(0);
 
+		}
+	}
+	return NULL;
+}
+/********************************************************************/
+/**
+ * the main routine
+ */
+int main(int argc, char* argv[]) {
+	startup();
+	return 0;
+}
+/********************************************************************/
+/**
+ * print out a welcome message
+ */
+void print_start_msg(void) {
+	fprintf(stderr, "###############################\n");
+	fprintf(stderr, "Welcome to Severin's FileServer\n");
+	fprintf(stderr, "###############################\n");
+}
+/********************************************************************/
+/**
+ * process a line sent to the server (tokenize and send it call the
+ * if applicable
+ */
 void process(int s, char *clientbuf) {
 	char command[1024];
 	char buf[1024];
-	char err[1024];
-	char *fullcmd[1024];
 	char *pch;
 	int ac;
 	char **av;
 	cmd *ic;
 	strscpy(buf, clientbuf, sizeof(buf));
-	strscpy(fullcmd, clientbuf, sizeof(fullcmd));
 	if (!*buf)
 		return;
 	pch = strpbrk(buf, " ");
@@ -45,32 +91,24 @@ void process(int s, char *clientbuf) {
 	} else
 		pch = buf + strlen(buf);
 	strscpy(command, buf, sizeof(command));
-	ac = tokenize(fullcmd,&av);
+	ac = tokenize(command,&av);
 
 	/* we'd like to call our functions dynamically */
 	if ((ic = find_cmd(command))) {
 		if (ic->func)
 			ic->func(s,ac,av);
 	} else {
-		sprintf(buf, "Unknown command: %s\n", serverbuf);
+		sprintf(buf, "Unknown command: %s\n", command);
 		fprintf(stderr, "%s", buf);
 		send(s, buf, sizeof(buf), 0);
 	}
 	free(av);
 }
 
-
-int main(int argc, char* argv[]) {
-	startup();
-	return 0;
-}
-
-void print_start_msg(void) {
-	fprintf(stderr, "###############################\n");
-	fprintf(stderr, "Welcome to Severin'ŝ FileServer\n");
-	fprintf(stderr, "###############################\n");
-}
-
+/********************************************************************/
+/**
+ * fire up the server
+ */
 void startup(void) {
 	print_start_msg();
 
@@ -95,10 +133,14 @@ void startup(void) {
 
 	start_server();
 }
-
+/********************************************************************/
+/**
+ * open the server for connections
+ */
 void start_server(void) {
-	int len, rc;
-	int tid;
+	unsigned int len;
+	int rc,tid;
+	char serverbuf[1024];
 	struct sockaddr_in addr;
 	struct sockaddr_in client;
 
@@ -125,7 +167,7 @@ void start_server(void) {
 		fprintf(stderr, "Bind Successful\n");
 	}
 
-	if ((listen(sock, serverbuf) < 0)) {
+	if ((listen(sock, sizeof(serverbuf)) < 0)) {
 		fprintf(stderr, "Listen Failed\n");
 		exit(EXIT_FAILURE);
 	} else {
@@ -160,33 +202,4 @@ void start_server(void) {
 			}
 		}
 	}
-}
-
-void *doprocessing(void *client_socket) {
-	int s;
-	int csock = *((int *) client_socket);
-	char buf[4096];
-	char client_buf[4096];
-	bzero(buf, sizeof(buf));
-	while (!quitting) {
-		s = recv(csock, buf, sizeof(buf), 0);
-		if (s > 0) {
-			buf[s] = 0;
-			// we use LF as a line breaker, its easier to parse the commands
-			char *pch = strtok(buf, "\n");
-			while (pch != NULL) {
-				strcpy(client_buf, pch);
-
-				process(csock,client_buf);
-				client_buf[s] = 0;
-				pch = strtok(NULL, "\n");
-			}
-		} else {
-			fprintf(stderr, "Client disconnected\n");
-			close(csock);
-			pthread_exit(0);
-
-		}
-	}
-	return -1;
 }
