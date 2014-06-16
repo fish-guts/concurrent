@@ -22,8 +22,6 @@ int main(int argc, char* argv[]) {
 	int t1, t2;
 	pthread_t thread_send;
 	pthread_t thread_recv;
-	char buf[BUF_SIZE];
-	char input[256];
 	sock = socket(AF_INET, SOCK_STREAM, 0);
 	if ((he = gethostbyname(HOST)) == NULL) {
 		fprintf(stderr, "error resolving hostname..");
@@ -69,7 +67,7 @@ void *start_send(void *sock_ptr) {
 	while (!quitting) {
 		in = fgets(input, sizeof(input), stdin);
 		if (send(sock, input, sizeof(input), 0) < 0)
-			fprintf(stderr, "Error sending data: %i\n", errno);
+			fprintf(stderr, "Error sending data: %s (%i)\n",in, errno);
 	}
 	return NULL;
 }

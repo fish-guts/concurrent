@@ -1,7 +1,8 @@
 RM = rm
 CC = gcc
-ODIR = obj
+OBJ_DIR = obj
 CFLAGS = -Wall -O2 -g -c
+MKDIR_P = mkdir -p 
 
 # Add inputs and outputs from these tool invocations to the build variables 
 
@@ -11,8 +12,8 @@ TEST_SRC = src/client.c
 
 
 #obj
-RUN_OBJS = 	obj/command.o obj/main.o obj/util.o obj/sock.o
-TEST_OBJS = obj/client.o
+RUN_OBJS = 	${OBJ_DIR}/command.o ${OBJ_DIR}/main.o ${OBJ_DIR}/util.o ${OBJ_DIR}/sock.o
+TEST_OBJS = ${OBJ_DIR}/client.o
 
 #lib
 LIBS = pthread
@@ -27,6 +28,10 @@ INCLUDE := include
 # All Target
 all: server client
 
+# create the directories 
+directories:
+	@mkdir -p ${OBJ_DIR}
+
 #run Target
 
 run: server
@@ -37,7 +42,7 @@ test: client
 
 # Tool invocations
 
-server: $(RUN_OBJS)
+server: directories $(RUN_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C Compiler'
 	
@@ -49,23 +54,20 @@ server: $(RUN_OBJS)
 	
 	
 ./obj/main.o :
-	@mkdir -p obj
-	$(CC) -I$(INCLUDE) $(CFLAGS) src/main.c -o obj/main.o
+	$(CC) -I$(INCLUDE) $(CFLAGS) src/main.c -o ${OBJ_DIR}/main.o
 	
 ./obj/sock.o :
-	$(CC) -I$(INCLUDE) $(CFLAGS) src/sock.c -o obj/sock.o
+	$(CC) -I$(INCLUDE) $(CFLAGS) src/sock.c -o ${OBJ_DIR}/sock.o
 ./obj/command.o :
-	$(CC) -I$(INCLUDE) $(CFLAGS) src/command.c -o obj/command.o
+	$(CC) -I$(INCLUDE) $(CFLAGS) src/command.c -o ${OBJ_DIR}/command.o
 	
 ./obj/util.o :
-	$(CC) -I$(INCLUDE) $(CFLAGS) src/util.c	 -o obj/util.o
+	$(CC) -I$(INCLUDE) $(CFLAGS) src/util.c	 -o ${OBJ_DIR}/util.o
 	
 # Tool invocations
-client: $(TEST_OBJS)
+client: directories $(TEST_OBJS)
 	@echo 'Building target: $@'
-	@echo 'Invoking: GCC C Compiler'
-	
-	$(CC) -I$(INCLUDE) $(CFLAGS) -o "$@" $<  
+	@echo 'Invoking: GCC C Compiler'  
 
 	@echo 'done...'
 	@echo 'Invoking: GCC C Linker'
@@ -74,7 +76,7 @@ client: $(TEST_OBJS)
 	@echo ' '
 	
 ./obj/client.o : 
-	$(CC) -I$(INCLUDE) $(CFLAGS) src/client.c -o obj/client.o		
+	$(CC) -I$(INCLUDE) $(CFLAGS) src/client.c -o ${OBJ_DIR}/client.o		
 
 # Other Targets
 clean:
