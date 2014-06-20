@@ -7,7 +7,7 @@
 
 #include "main.h"
 
-#define BUFSIZE 1045876
+#define BUFSIZE 8192
 
 cmd cmds[] = {
 		{ "CREATE", cmd_create },
@@ -15,7 +15,8 @@ cmd cmds[] = {
 		{ "LIST", cmd_list },
 		{ "READ", cmd_read },
 		{ "DELETE", cmd_delete },
-		{ "UPDATE", cmd_update }
+		{ "UPDATE", cmd_update },
+		{ NULL, NULL }
 };
 /********************************************************************/
 /**
@@ -25,8 +26,7 @@ void cmd_create(int s, int ac, char **av) {
 	char err[64] = "Usage: CREATE <FILENAME> <LENGTH>\n<CONTENT>";
 	char suc[] = "FILECREATED\n";
 	char ext[] = "FILEEXISTS\n";
-	void * buf;
-	fprintf(stderr,"ac: %i\n",ac);
+	void* buf;
 	if (ac < 3) {
 		send(s, err, sizeof(err), 0);
 		return;
@@ -35,10 +35,9 @@ void cmd_create(int s, int ac, char **av) {
 		return;
 	} else {
 		// read the content
-		int contentSize=atoi(av[2]);
-		buf=smalloc(contentSize);
-		recv(s,buf,contentSize,0);
-
+		int content_size=atoi(av[2]);
+		buf=smalloc(content_size);
+		recv(s,buf,content_size,0);
 		// search for the file
 		iterator it;
 		iterator_init(&it);
@@ -59,7 +58,7 @@ void cmd_create(int s, int ac, char **av) {
 		// file not found, create new one
 		sFile *f = scalloc(sizeof(sFile), 1);
 		f->filename = sstrdup(av[1]);
-		f->size = contentSize;
+		f->size = content_size;
 		f->content = sstrdup(buf);
 		f->next = NULL;
 		pthread_mutex_init(&f->mutex,NULL);
@@ -109,24 +108,22 @@ void cmd_exit(int s, int ac, char **av) {
 void cmd_list(int s, int ac, char **av) {
 	iterator it;
 	int count = 0;
-	char ack[32];
-	char *curfile;
+	char *ack = (char*)malloc(sizeof(char*)*BUFSIZE);
+	char *buf = (char*)malloc(sizeof(char*)*BUFSIZE);
+	sprintf(buf,"\n");
 	sFile *current = file_list;
 	iterator_init(&it);
+	// write files to buffer to make it threadsafe
 	while ((current = iterator_next(&it)) != NULL) {
+		sprintf(buf,"%s%s\n",buf,current->filename);
 		count++;
 	}
 	iterator_destroy(&it);
-	sprintf(ack, "ACK %i\n", count);
+	sprintf(ack, "ACK %i\n%s\n", count,buf);
 	send(s, ack, (int) strlen(ack), 0);
-	iterator_init(&it);
-	// we need to count through all the items before someone changes it
-	while ((current = iterator_next(&it)) != NULL) {
-		curfile = (char*)malloc(sizeof(char*)*128);
-		sprintf(curfile,"%s\n",current->filename);
-		send(s, curfile, strlen(current->filename), 0);
-		free(curfile);
-	}
+	//done, free memory
+	free(buf);
+	free(ack);
 }
 /********************************************************************/
 /**
@@ -207,8 +204,9 @@ void cmd_update(int s, int ac, char **av) {
 cmd *find_cmd(const char *name) {
 	cmd *c;
 	for (c = cmds; c->name; c++) {
-		if (stricmp(name, c->name) == 0)
+		if (stricmp(name, c->name) == 0) {
 			return c;
+		}
 	}
 	return NULL;
 }

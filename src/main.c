@@ -95,7 +95,7 @@ void process(int s, char *clientbuf) {
 	ac = tokenize(clientbuf,&av);
 
 	/* we'd like to call our functions dynamically */
-	if ((ic = find_cmd(command))) {
+	if ((ic = find_cmd(buf))) {
 		if (ic->func)
 			ic->func(s,ac,av);
 	} else {

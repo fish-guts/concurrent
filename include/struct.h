@@ -9,6 +9,7 @@
 #define STRUCT_H_
 
 typedef struct _sFile sFile;
+typedef struct _cmd cmd;
 
 
 
@@ -21,10 +22,10 @@ struct _sFile {
 };
 
 
-typedef struct
+struct _cmd
 {
     const char *name;
     void (*func)(int s,int ac, char **av);
-} cmd;
+};
 
 #endif /* STRUCT_H_ */
