@@ -108,13 +108,12 @@ void process(int s, char *clientbuf) {
 
 /********************************************************************/
 /**
- * fire up the server
+ * fire up the app
  */
 void startup(void) {
 	print_start_msg();
-
-// daemonize, not yet needed.
-	/* pid_t pid, sid;
+	//daemonize
+	pid_t pid, sid;
 	 if (getppid() == 1)
 	 return;
 	 pid = fork();
@@ -129,8 +128,7 @@ void startup(void) {
 	 int rc;
 	 if ((chdir("/")) < 0)
 	 exit(EXIT_FAILURE);
-	 // done, now we need to open some sockets and wait for connections;
-	 * */
+	 // done, we can now start the server
 
 	start_server();
 }
