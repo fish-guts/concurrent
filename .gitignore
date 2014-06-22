@@ -2,3 +2,6 @@ obj/
 .settings/
 .cproject
 .project
+run
+test
+.gitignore~
